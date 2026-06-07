@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function Certificat() {
+export default function Casier() {
   const navigate = useNavigate();
 
   // Gestion des étapes : "form" | "waiting_payment" | "success"
@@ -13,6 +13,7 @@ export default function Certificat() {
     nom: "",
     prenom: "",
     telephone: "",
+    situationMatrimoniale: "", 
   });
 
   const [files, setFiles] = useState({
@@ -22,47 +23,59 @@ export default function Certificat() {
     acte_individuel: null,
   });
 
+  const [preview, setPreview] = useState({
+    extrait: null,
+    recto_piece: null,
+    verso_piece: null,
+    acte_individuel: null,
+  });
+
   // ======================
-  // HANDLE INPUT TEXT
+  // HANDLE INPUT TEXT & SELECT
   // ======================
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   // ======================
-  // HANDLE FILES
+  // HANDLE FILES WITH PREVIEW
   // ======================
   const handleFileChange = (e) => {
-    const  file = e.target.files[0];
+    const file = e.target.files[0];
     const name = e.target.name;
-    setFiles((prev) => ({
-      ...prev,
-      [name]: file
-    }));
-    if (file) {
+    
+    setFiles((prev) => ({ ...prev, [name]: file }));
+    
+    if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = () => {
-        setPreview((prev) => ({
-          ...prev,
-          [name]: reader.result
-        }));
+        setPreview((prev) => ({ ...prev, [name]: reader.result }));
       };
       reader.readAsDataURL(file);
+    } else {
+      setPreview((prev) => ({ ...prev, [name]: null }));
     }
   };
 
   // ======================
-  // ETAPE 1 : SUBMIT FORMULAIRE (Création du certificat d'abord)
+  // ETAPE 1 : SUBMIT FORMULAIRE
   // ======================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    loading || setLoading(true);
+    setLoading(true);
 
     try {
       const formData = new FormData();
       formData.append("nom", form.nom);
       formData.append("prenom", form.prenom);
       formData.append("telephone", form.telephone);
+      
+      // 🔥 CORRECTION SÉCURISÉE : Récupération stricte de la valeur choisie par l'utilisateur
+      const valeurChoisie = form.situationMatrimoniale || e.target.situationMatrimoniale.value || "";
+      
+      // Envoi sous les deux formats de casse pour être compatible à 100% avec ton API/TypeORM
+      formData.append("situationMatrimoniale", valeurChoisie);
+      formData.append("situationmatrimoniale", valeurChoisie);
 
       Object.keys(files).forEach((key) => {
         if (files[key]) {
@@ -70,7 +83,6 @@ export default function Certificat() {
         }
       });
 
-      // API CREATE CERTIFICAT (votre table certificat locale)
       const res = await fetch("http://localhost:3000/certificat", {
         method: "POST",
         body: formData,
@@ -93,10 +105,9 @@ export default function Certificat() {
   };
 
   // ======================
-  // ETAPE 2 : ACTION DE PAIEMENT (CORRIGÉE 🔥)
+  // ETAPE 2 : ACTION DE PAIEMENT
   // ======================
   const handlePayNow = async () => {
-    // Extraction sécurisée de l'ID généré par NestJS / TypeORM
     const certificatId = createdData?.id || createdData?.IDENTIFIANT || createdData?.id_certificat;
 
     if (!certificatId) {
@@ -106,15 +117,14 @@ export default function Certificat() {
 
     setLoading(true);
     try {
-      // Envoi de la requête à votre API via le tunnel ngrok
       const res = await fetch("https://wooing-whacking-epidermal.ngrok-free.dev/paiement/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: form.telephone,
-          montant: 200, // 🔥 Ajusté à une valeur standard en FCFA (Ex: 2000)
+          montant: 2000, 
           type_service: "casier judiciaire",
-          certificat_id: Number(certificatId) // 🔥 CRUCIAL : On transmet l'ID pour la liaison de table !
+          certificat_id: Number(certificatId)
         }),
       });
 
@@ -123,10 +133,7 @@ export default function Certificat() {
       const paymentData = await res.json();
 
       if (paymentData?.payment_url) {
-        // On mémorise l'état avant redirection pour afficher le succès au retour
         localStorage.setItem("pending_payment_success", "true");
-
-        // Redirection vers l'interface de paiement PayDunya
         window.location.href = paymentData.payment_url;
       } else {
         throw new Error("L'URL de paiement n'a pas été générée");
@@ -140,7 +147,6 @@ export default function Certificat() {
     }
   };
 
-  // Gestion du retour de paiement réussi après redirection
   useEffect(() => {
     const isSuccess = localStorage.getItem("pending_payment_success");
     if (isSuccess === "true") {
@@ -149,159 +155,152 @@ export default function Certificat() {
     }
   }, []);
 
-  //AFFICHAGE DE PRÉVISUALISATION DES DOCUMENTS (OPTIONNEL)
-  const [preview, setPreview] = useState({});
-  
-  // ======================
-  // STYLES
-  // ======================
-  const containerStyle = {
-    maxWidth: "800px",
-    margin: "20px auto",
-    padding: "30px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "10px",
-    boxShadow: "0 0 15px rgba(0,0,0,0.1)",
-    fontFamily: "Arial, sans-serif",
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "12px",
-    marginBottom: "12px",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    boxSizing: "border-box",
-  };
-
-  const buttonStyle = {
-    width: "100%",
-    padding: "14px",
-    backgroundColor: "#007BFF",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontSize: "16px",
-    fontWeight: "bold",
-  };
-
-  const payButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#28a745",
-    marginTop: "20px",
-  };
-
-  const messageBoxStyle = {
-    textAlign: "center",
-    padding: "30px 20px",
-    backgroundColor: "#fff",
-    borderRadius: "8px",
-    border: "1px solid #e3e3e3",
-  };
-
-  // =========================================================================
-  // RENDU 1 : ÉCRAN DE SUCCÈS FINAL
-  // =========================================================================
-  if (step === "success") {
-    return (
-      <div style={containerStyle}>
-        <div style={messageBoxStyle}>
-          <h2 style={{ color: "#28a745" }}>🎉 Félicitations !</h2>
-          <p style={{ fontSize: "16px", lineHeight: "1.6", color: "#333" }}>
-            Votre demande est bien prise en compte. Nous allons procéder au traitement le plus vite possible.
-          </p>
-          <p style={{ fontWeight: "bold", color: "orange", marginTop: "25px" }}>
-            ACADEMY PRO vous remercie pour votre confiance !
-          </p>
-          <button style={{ ...buttonStyle, marginTop: "20px", width: "auto" }} onClick={() => navigate("/dashboard")}>
-            Aller au Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // =========================================================================
-  // RENDU 2 : MESSAGE DE TRANSITION (VERS LE PAIEMENT)
-  // =========================================================================
-  if (step === "waiting_payment") {
-    return (
-      <div style={containerStyle}>
-        <div style={messageBoxStyle}>
-          <h2 style={{ color: "orange" }}>📩 Informations reçues !</h2>
-          <p style={{ fontSize: "16px", color: "#555" }}>
-            Merci d'avoir envoyé vos informations. Veuillez maintenant procéder au paiement pour finaliser votre demande.
-          </p>
-          
-          <button style={payButtonStyle} onClick={handlePayNow} disabled={loading}>
-            {loading ? "⏳ Redirection vers PayDunya..." : "💳 Payer maintenant"}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // =========================================================================
-  // RENDU 3 : LE FORMULAIRE INITIAL
-  // =========================================================================
   return (
-    <div style={containerStyle}>
-      <h2 style={{ textAlign: "center", background: "orange", color: "#fff", padding: "10px", borderRadius: "4px" }}>
-        📄 DEMANDE DE CASIER JUDICIAIRE
-      </h2>
+    <div style={{ background: "#f1f5f9", minHeight: "100vh", padding: "40px 15px", fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .input-field:focus { border-color: #22c55e !important; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1) !important; outline: none; }
+        .btn-action { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+        .btn-action:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .fade-in { animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          name="nom"
-          placeholder="Nom"
-          onChange={handleChange}
-          required
-          style={inputStyle}
-        />
-
-        <input
-          name="prenom"
-          placeholder="Prénom"
-          onChange={handleChange}
-          required
-          style={inputStyle}
-        />
-
-        <input
-          name="telephone"
-          placeholder="Téléphone"
-          onChange={handleChange}
-          required
-          style={inputStyle}
-        />
-
-        <h3 style={{backgroundColor:"green", color:"#fff", padding: "10px", textAlign:"center"}}> Documents obligatoires</h3>
-
-        <label style={{ fontWeight: "bold", display: "block", marginTop: "10px" }}>Extrait de moins d'un an du demandeur</label>
-        <input type="file" name="extrait" onChange={handleFileChange} required style={{ margin: "5px 0 15px 0" }} />
+      <div style={containerStyle}>
         
-        {preview.extrait && <img src={preview.extrait} alt="Aperçu" style={{ maxWidth: "10%", height: "auto",  margin: "20px auto" }} />}
+        {/* EN-TÊTE PREMIUM */}
+        <div style={headerStyle}>
+          <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "800", textTransform: "uppercase" }}>
+            📄 Demande de Casier Judiciaire
+          </h2>
+        </div>
 
-        
-        <h3 style={{backgroundColor:"#FFCC80", color:"#3e2723", padding:"10px", textAlign:"center"}}> Documents facultatifs</h3>
+        {/* ÉCRAN DE SUCCÈS */}
+        {step === "success" && (
+          <div className="fade-in" style={{ padding: "40px 30px", textAlign: "center" }}>
+            <div style={{ fontSize: "56px", marginBottom: "16px" }}>🎉</div>
+            <h2 style={{ color: "#16a34a", fontWeight: "800", margin: "0 0 12px" }}>Félicitations !</h2>
+            <p style={{ fontSize: "16px", color: "#475569", lineHeight: "1.6", margin: "0 0 24px" }}>
+              Votre demande est bien prise en compte. Nous allons procéder au traitement le plus vite possible.
+            </p>
+            <div style={{ background: "#f0fdf4", padding: "16px", borderRadius: "12px", border: "1px solid #bbf7d0", fontWeight: "700", color: "#16a34a", marginBottom: "32px" }}>
+              ACADEMY PRO vous remercie pour votre confiance !
+            </div>
+            <button className="btn-action" style={primaryButtonStyle} onClick={() => navigate("/dashboard")}>
+              Aller au Dashboard
+            </button>
+          </div>
+        )}
 
-        <label style={{ display: "block" }}>Recto pièce</label>
-        <input type="file" name="recto_piece" onChange={handleFileChange} style={{ margin: "5px 0 15px 0" }} />
-        {preview.recto_piece && <img src={preview.recto_piece} alt="Aperçu" style={{ maxWidth: "10%", height: "auto",  margin: "20px auto" }} />}
-        <label style={{ display: "block" }}>Verso pièce</label>
-        <input type="file" name="verso_piece" onChange={handleFileChange} style={{ margin: "5px 0 15px 0" }} />
-        {preview.verso_piece && <img src={preview.verso_piece} alt="Aperçu" style={{ maxWidth: "10%", height: "auto",  margin: "20px auto" }} />}
+        {/* ÉCRAN D'ATTENTE DE PAIEMENT */}
+        {step === "waiting_payment" && (
+          <div className="fade-in" style={{ padding: "40px 30px", textAlign: "center" }}>
+            <div style={{ fontSize: "56px", marginBottom: "16px" }}>📩</div>
+            <h2 style={{ color: "#ea580c", fontWeight: "800", margin: "0 0 12px" }}>Informations reçues !</h2>
+            <p style={{ fontSize: "16px", color: "#475569", lineHeight: "1.6", margin: "0 0 32px" }}>
+              Merci d'avoir envoyé vos informations. Veuillez maintenant procéder au paiement sécurisé pour finaliser votre demande.
+            </p>
+            <button className="btn-action" style={payButtonStyle} onClick={handlePayNow} disabled={loading}>
+              {loading ? "⏳ Redirection vers PayDunya..." : "💳 Payer maintenant"}
+            </button>
+          </div>
+        )}
 
-        <label style={{ display: "block" }}>Acte individuel</label>
-        <input type="file" name="acte_individuel" onChange={handleFileChange} style={{ margin: "5px 0 15px 0" }} />
-        {preview.acte_individuel && <img src={preview.acte_individuel} alt="Aperçu" style={{ maxWidth: "10%", height: "auto",  margin: "20px auto" }} />}
-        <br /><br />
+        {/* FORMULAIRE PRINCIPAL */}
+        {step === "form" && (
+          <div style={{ padding: "30px" }}>
+            <form onSubmit={handleSubmit}>
+              
+              <div style={sectionTitle}>👤 Informations Personnelles</div>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                <input name="nom" placeholder="Nom" className="input-field" style={inputStyle} required onChange={handleChange} />
+                <input name="prenom" placeholder="Prénom" className="input-field" style={inputStyle} required onChange={handleChange} />
+              </div>
+              
+              <input name="telephone" type="tel" placeholder="Téléphone" className="input-field" style={inputStyle} required onChange={handleChange} />
 
-        <button type="submit" style={buttonStyle} disabled={loading}>
-          {loading ? "⏳ Envoi des documents..." : "Envoyer la demande"}
-        </button>
-      </form>
+              {/* SÉLECTEUR DE SITUATION MATRIMONIALE */}
+              <div style={{ marginBottom: "15px" }}>
+                <label style={labelStyle}>Situation Matrimoniale <span style={{ color: "#ef4444" }}>*</span></label>
+                <select 
+                  name="situationMatrimoniale" 
+                  className="input-field" 
+                  style={inputStyle} 
+                  required 
+                  onChange={handleChange}
+                  value={form.situationMatrimoniale}
+                >
+                  <option value="">-- Sélectionnez votre situation --</option>
+                  <option value="Célibataire">Célibataire</option>
+                  <option value="Marié(e)">Marié(e)</option>
+                  <option value="Divorcé(e)">Divorcé(e)</option>
+                  <option value="Veuf/Veuve">Veuf/Veuve</option>
+                </select>
+              </div>
+
+              {/* DOCUMENTS OBLIGATOIRES */}
+              <div style={sectionDividerGreen}>📄 Documents obligatoires</div>
+              
+              <div style={fileBox}>
+                <p style={fileLabel}>Extrait de moins d'un an du demandeur <span style={{ color: "#ef4444" }}>*</span></p>
+                <input type="file" name="extrait" accept=".pdf,.jpg,.jpeg,.png" required onChange={handleFileChange} style={{ fontSize: "14px" }} />
+                {preview.extrait && (
+                  <div style={previewContainerStyle}><img src={preview.extrait} style={thumbStyle} alt="Aperçu Extrait" /></div>
+                )}
+              </div>
+
+              {/* DOCUMENTS FACULTATIFS */}
+              <div style={sectionDividerOrange}>📁 Documents facultatifs</div>
+              
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "15px" }}>
+                <div style={fileBox}>
+                  <p style={fileLabel}>Recto pièce</p>
+                  <input type="file" name="recto_piece" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} style={{ fontSize: "13px" }} />
+                  {preview.recto_piece && (
+                    <div style={previewContainerStyle}><img src={preview.recto_piece} style={thumbStyle} alt="Aperçu Recto" /></div>
+                  )}
+                </div>
+
+                <div style={fileBox}>
+                  <p style={fileLabel}>Verso pièce</p>
+                  <input type="file" name="verso_piece" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} style={{ fontSize: "13px" }} />
+                  {preview.verso_piece && (
+                    <div style={previewContainerStyle}><img src={preview.verso_piece} style={thumbStyle} alt="Aperçu Verso" /></div>
+                  )}
+                </div>
+              </div>
+
+              <div style={fileBox}>
+                <p style={fileLabel}>Acte individuel</p>
+                <input type="file" name="acte_individuel" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileChange} style={{ fontSize: "14px" }} />
+                {preview.acte_individuel && (
+                  <div style={previewContainerStyle}><img src={preview.acte_individuel} style={thumbStyle} alt="Aperçu Acte" /></div>
+                )}
+              </div>
+
+              <button type="submit" className="btn-action" style={{ ...primaryButtonStyle, marginTop: "35px" }} disabled={loading}>
+                {loading ? "⏳ Envoi des documents..." : "Envoyer la demande"}
+              </button>
+
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
+// Styles de l'interface
+const containerStyle = { background: "#ffffff", maxWidth: "650px", margin: "0 auto", borderRadius: "24px", overflow: "hidden", boxShadow: "0 10px 25px rgba(0,0,0,0.05)", border: "1px solid #e2e8f0" };
+const headerStyle = { background: "#ea580c", color: "#ffffff", padding: "24px", textAlign: "center" };
+const labelStyle = { fontSize: "14px", fontWeight: "700", color: "#334155", marginBottom: "8px", display: "block" };
+const inputStyle = { width: "100%", padding: "14px", borderRadius: "12px", border: "1px solid #cbd5e1", fontSize: "15px", marginBottom: "15px", boxSizing: "border-box", transition: "all 0.2s", background: "#fff" };
+const sectionTitle = { fontSize: "16px", fontWeight: "800", color: "#ea580c", borderBottom: "2px solid #ffedd5", paddingBottom: "5px", margin: "10px 0 20px" };
+const sectionDividerGreen = { background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)", color: "#14532d", padding: "10px 16px", borderRadius: "10px", fontWeight: "700", fontSize: "14px", textAlign: "center", margin: "30px 0 15px 0" };
+const sectionDividerOrange = { ...sectionDividerGreen, background: "linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)", color: "#7c2d12" };
+const fileBox = { background: "#f8fafc", padding: "15px", borderRadius: "14px", border: "2px dashed #cbd5e1", transition: "all 0.2s" };
+const fileLabel = { margin: "0 0 10px 0", fontSize: "13px", fontWeight: "700", color: "#334155" };
+const previewContainerStyle = { marginTop: "12px", display: "flex", justifyContent: "flex-start" };
+const thumbStyle = { maxWidth: "120px", maxHeight: "85px", objectFit: "cover", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)", border: "1px solid #e2e8f0" };
+const primaryButtonStyle = { width: "100%", padding: "16px", background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)", color: "#ffffff", border: "none", borderRadius: "14px", fontSize: "16px", fontWeight: "700", cursor: "pointer", boxShadow: "0 10px 15px -3px rgba(34, 197, 94, 0.2)" };
+const payButtonStyle = { ...primaryButtonStyle, background: "linear-gradient(135deg, #ea580c 0%, #ca8a04 100%)", boxShadow: "0 10px 15px -3px rgba(234, 88, 12, 0.2)" };
