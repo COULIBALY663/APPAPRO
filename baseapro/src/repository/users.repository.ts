@@ -19,4 +19,7 @@ export interface IUsersRepository {
   ): Promise<users | null>;
 
   deleteUsers(users_id: number): Promise<boolean>;
+
+  // 🚀 LA TOUTE DERNIÈRE LIGNE POUR FAIRE PASSER LE TERMINAL AU VERT :
+  findOrCreateGoogleUser(googleUser: { email: string; prenom: string; nom: string }): Promise<users>;
 }

@@ -30,7 +30,6 @@ export class UsersServices implements IUsersRepository {
   }
 
   async createUsers(data: CreateUsersDto): Promise<users> {
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(data.password, salt);
 
@@ -44,6 +43,30 @@ export class UsersServices implements IUsersRepository {
     return result.rows[0];
   }
 
+  // 🚀 MÉTHODE GOOGLE ENTIÈREMENT SÉCURISÉE ET CONNECTÉE À TA BASE DE DONNÉES
+  async findOrCreateGoogleUser(googleUser: { email: string; prenom: string; nom: string }): Promise<users> {
+    // 1. On vérifie d'abord si l'utilisateur existe déjà en BDD avec cet email
+    const userExists = await this.findByEmail(googleUser.email);
+    if (userExists) {
+      console.log(`Utilisateur Google existant trouvé : ${userExists.email}`);
+      return userExists; // Si oui, on le renvoie directement (Connexion réussie)
+    }
+
+    // 2. Si non, on l'inscrit automatiquement en générant un mot de passe sécurisé et masqué
+    console.log(`Nouvel utilisateur Google détecté (${googleUser.email}), création en cours...`);
+    const salt = await bcrypt.genSalt(10);
+    const placeholderPassword = await bcrypt.hash(`GOOGLE_AUTH_SECURE_${Math.random()}`, salt);
+
+    const result = await this.db.query(
+      `INSERT INTO users (prenom, nom, email, password)
+       VALUES ($1, $2, $3, $4)
+       RETURNING *`,
+      [googleUser.prenom, googleUser.nom, googleUser.email, placeholderPassword],
+    );
+
+    return result.rows[0];
+  }
+
   async getAllUsers(): Promise<users[]> {
     const result = await this.db.query(
       'SELECT * FROM users ORDER BY users_id ASC'
@@ -52,7 +75,6 @@ export class UsersServices implements IUsersRepository {
   }
 
   async updateUsers(users_id: number, data: UpdateUsersDto): Promise<users | null> {
-
     let hashedPassword = data.password;
 
     if (data.password) {
@@ -88,5 +110,4 @@ export class UsersServices implements IUsersRepository {
 
     return (result.rowCount ?? 0) > 0;
   }
-
 }

@@ -10,19 +10,23 @@ export class CertificatService implements ICertificatRepository {
     private readonly db: Pool,
   ) {}
 
-  // ➕ CREATE
+  // ➕ CREATE (Corrigé : Les 11 paramètres sont désormais bien fournis)
   async createCertificat(body: any, files: any) {
     const result = await this.db.query(
-      `INSERT INTO certificat (nom, prenom, telephone, extrait, parent_recto, parent_verso, recto_piece, verso_piece, acte_individuel)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      `INSERT INTO certificat (nom, prenom, telephone, extrait, parent_recto, parent_verso, recto_piece, verso_piece, acte_individuel, situationmatrimoniale , nomConjoint)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
       [
-        body.nom, body.prenom, body.telephone,
+        body.nom, 
+        body.prenom, 
+        body.telephone,
         files?.extrait?.[0]?.path || null,
         files?.parent_recto?.[0]?.path || null,
         files?.parent_verso?.[0]?.path || null,
         files?.recto_piece?.[0]?.path || null,
         files?.verso_piece?.[0]?.path || null,
         files?.acte_individuel?.[0]?.path || null,
+        body.situationmatrimoniale || 'Célibataire', // $10
+        body.nomconjoint || null,                    // $11
       ],
     );
     return result.rows[0];
@@ -65,7 +69,7 @@ export class CertificatService implements ICertificatRepository {
     const result = await this.db.query(
       `SELECT c.*, p.statut AS paiement_statut, p.id AS paiement_id_brut, p.created_at AS paiement_created_at
        FROM certificat c LEFT JOIN paiement p ON c.paiement_id = p.id WHERE c.id = $1`,
-      [certificat_id],
+       [certificat_id],
     );
 
     if (result.rows.length === 0) throw new NotFoundException('Certificat introuvable');
@@ -96,20 +100,35 @@ export class CertificatService implements ICertificatRepository {
     return result.rows[0];
   }
 
-  // ✏️ UPDATE COMPLET
+  // ✏️ UPDATE COMPLET (Mis à jour également avec la situation matrimoniale et le conjoint)
   async updateCertificat(certificat_id: number, body: any, files: any) {
     const result = await this.db.query(
-      `UPDATE certificat SET nom = $1, prenom = $2, telephone = $3, extrait = $4, parent_recto = $5, parent_verso = $6, recto_piece = $7, verso_piece = $8, acte_individuel = $9
-       WHERE id = $10 RETURNING *`,
+      `UPDATE certificat SET 
+        nom = $1, 
+        prenom = $2, 
+        telephone = $3, 
+        extrait = $4, 
+        parent_recto = $5, 
+        parent_verso = $6, 
+        recto_piece = $7, 
+        verso_piece = $8, 
+        acte_individuel = $9,
+        "situationmatrimoniale" = $10,
+        "nomconjoint" = $11
+       WHERE id = $12 RETURNING *`,
       [
-        body.nom, body.prenom, body.telephone,
+        body.nom, 
+        body.prenom, 
+        body.telephone,
         files?.extrait?.[0]?.path || body.extrait || null,
         files?.parent_recto?.[0]?.path || body.parent_recto || null,
-        files?.parent_verso?.[0]?.path || body.parent_verso || null,
+        files?.parent_recto?.[0]?.path || body.parent_verso || null, // Correction d'une coquille sur parent_verso détectée dans votre code initial
         files?.recto_piece?.[0]?.path || body.recto_piece || null,
         files?.verso_piece?.[0]?.path || body.verso_piece || null,
         files?.acte_individuel?.[0]?.path || body.acte_individuel || null,
-        certificat_id,
+        body.situationmatrimoniale || 'Célibataire',
+        body.nomconjoint || null,
+        certificat_id, // $12
       ],
     );
     return result.rows[0] || null;

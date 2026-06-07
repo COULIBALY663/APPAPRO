@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseModule } from './Database/pg.module';
+import { JwtModule } from '@nestjs/jwt'; 
 
 // === USERS ===
 import { UsersServices } from './Services/users.services';
@@ -12,6 +13,7 @@ import { IUsersRepository } from './repository/users.repository';
 import { LoginService } from './Services/Login.service';
 import { ILoginRepository } from './repository/login.repository';
 import { LoginController } from './controllers/login.controllers';
+import { GoogleStrategy } from './Services/google.strategy'; // 🚀 1. AJOUT DE L'IMPORT DE LA STRATÉGIE GOOGLE
 
 // === CASIER JUDICIAIRE ===
 import { CasierController } from './controllers/casier.controllers';
@@ -24,7 +26,6 @@ import { CERTIFICAT_REPOSITORY } from './repository/Certificat.repository';
 import { CertificatService } from './Services/Certificat.service';
 
 // === PAIEMENT ===
-// 💡 Les chemins ont été ajustés pour pointer directement vers tes dossiers existants
 import { Paiement } from './entities/paiement.entity'; 
 import { PaiementController } from './controllers/paiement.controllers'; 
 import { PaiementRepository } from './repository/paiement.repository'; 
@@ -38,7 +39,12 @@ import { PaiementService } from './Services/paiement.service';
     }),
     DatabaseModule,
     
-    // On charge l'entité Paiement dans TypeORM directement ici
+    JwtModule.register({
+      global: true, 
+      secret: process.env.JWT_SECRET || 'CLE_SECRET_PROVISOIRE_ACADEMIE_PRO_2026',
+      signOptions: { expiresIn: '1d' }, 
+    }),
+
     TypeOrmModule.forFeature([Paiement]),
   ],
 
@@ -47,7 +53,7 @@ import { PaiementService } from './Services/paiement.service';
     LoginController,
     CasierController,
     CertificatController, 
-    PaiementController,   
+    PaiementController,    
   ],
 
   providers: [
@@ -78,6 +84,9 @@ import { PaiementService } from './Services/paiement.service';
     // --- Configuration Paiement ---
     PaiementRepository,
     PaiementService,
+
+    // 🚀 2. ENREGISTREMENT DE LA STRATÉGIE GOOGLE POUR PASSPORT
+    GoogleStrategy,
   ],
 })
 export class AppModule { }

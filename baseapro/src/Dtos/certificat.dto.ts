@@ -10,6 +10,11 @@ export class CreateCertificatDto {
 
   @ApiProperty({ example: "0564225178" })
   telephone!: string;
+  @ApiProperty({ example: "CELIBATAIRE"})
+  situationMatrimoniale!: "string";
+  
+  @ApiProperty({example:"KONE"})
+  nomConjoint!: "string";
 
   @ApiProperty({ example: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f" })
   extrait!: string;
@@ -43,6 +48,12 @@ export class UpdateCertificatDto {
 
   @ApiProperty({ example: "0564225178", required: false })
   telephone?: string;
+  @ApiProperty({ example: "CELIBATAIRE"})
+  situationMatrimoniale!: "string";
+  
+  @ApiProperty({example:"KONE"})
+  nomConjoint!: "string";
+
 
   @ApiProperty({ example: "https://images.unsplash.com/photo-new.jpg", required: false })
   extrait?: string;
@@ -62,6 +73,7 @@ export class UpdateCertificatDto {
   @ApiProperty({ example: "https://images.unsplash.com/photo-new.jpg", required: false })
   acte_individuel?: string;
 }
+
 
 export class DeleteCertificatDto {
 
