@@ -4,7 +4,7 @@ import { renderFile } from "../utils/fileUtils";
 export default function CertificatsTab({ certificats, paiements, onValiderDossier, onDeleteCertificat, getPaymentBadgeStyle, translatePaymentStatus }) {
   return (
     <div>
-      <h2 style={{fontSize: "50px",textAlign: "center", backgroundColor: "orange", fontWeight: "bold", color: 'white', padding: "8px 12px", borderRadius: "4px" }}>
+      <h2 style={{ fontSize: "50px", textAlign: "center", backgroundColor: "orange", fontWeight: "bold", color: 'white', padding: "8px 12px", borderRadius: "4px" }}>
         📄 Gestion des Certificats
       </h2>
       <p style={{ fontWeight: "bold", color: "#555" }}>Total: {certificats?.length || 0}</p>
@@ -16,7 +16,8 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
               <th>IDENTIFIANT</th>
               <th>Noms et Prénoms</th>
               <th>Contact (Formulaire)</th>
-              <th>Détails Demande</th>
+              <th>Situation Matrimoniale</th>
+              <th>Nom du Conjoint</th>
               <th>Extrait</th>
               <th>Recto Parent</th>
               <th>Verso Parent</th>
@@ -62,14 +63,21 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                       📱 {c.telephone || c.Téléphone || "N/A"}<br />
                       <span style={{ fontSize: "11px", color: "#777" }}>{c.email || "Non disponible"}</span>
                     </td>
-                    <td>
-                      Exemplaires : <b>{c.nombre_copie || c.nombre_copies || c.NombreCopie || 1}</b><br />
-                      {c.created_at && (
-                        <span style={{ fontSize: "11px", color: "#777" }}>
-                          Le {new Date(c.created_at).toLocaleDateString()}
+                    
+                    {/* 🆕 Situation Matrimoniale (Laissée vide si pas de donnée) */}
+                    <td style={{ textAlign: "center" }}>
+                      {c.situationmatrimoniale && (
+                        <span style={{ backgroundColor: "#e0f2fe", color: "#0369a1", padding: "4px 8px", borderRadius: "4px", fontWeight: "500" }}>
+                          {c.situationmatrimoniale}
                         </span>
                       )}
                     </td>
+
+                    {/* 🆕 Nom du Conjoint (Laissé vide si pas de donnée) */}
+                    <td style={{ textAlign: "center", color: "#334155" }}>
+                      {c.nomconjoint || ""}
+                    </td>
+
                     <td style={{ textAlign: "center" }}>{renderFile(c.extrait)}</td>
                     <td style={{ textAlign: "center" }}>{renderFile(c.parent_recto)}</td>
                     <td style={{ textAlign: "center" }}>{renderFile(c.parent_verso)}</td>
@@ -96,7 +104,7 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
 
                   {/* Ligne jaune d'informations financières */}
                   <tr style={{ backgroundColor: "#fdf8e2" }}>
-                    <td colSpan="12" style={{ padding: "8px 15px", borderTop: "none" }}>
+                    <td colSpan="13" style={{ padding: "8px 15px", borderTop: "none" }}>
                       {paiementLie ? (
                         <div style={{ display: "flex", gap: "25px", alignItems: "center", fontSize: "12px", color: "#6c4b00" }}>
                           <span><b>💳 INFOS PAIEMENT :</b></span>

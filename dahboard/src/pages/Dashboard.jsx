@@ -89,7 +89,15 @@ export default function Dashboard() {
 
   const handleDeleteCertificat = async (id) => {
     if (!window.confirm("Supprimer ce certificat ?")) return;
-    try { if ((await fetch(`http://localhost:3000/certificat/${id}`, { method: "DELETE" })).ok) setCertificats(certificats.filter(c => (c.id || c.IDENTIFIANT) !== id)); } catch (err) { console.error(err); }
+    try { 
+      const res = await fetch(`http://localhost:3000/certificat/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setCertificats(certificats.filter(c => (c.id || c.IDENTIFIANT) !== id));
+      } else {
+        const errData = await res.json();
+        alert(`❌ Impossible de supprimer : ${errData.message || "Erreur de base de données"}`);
+      }
+    } catch (err) { console.error(err); }
   };
 
   // ================= SYSTÈME AUTHENTIFICATION COMPATIBLE MOT DE PASSE CRYPTÉ =================
@@ -98,7 +106,6 @@ export default function Dashboard() {
     setActivationMessage(""); 
 
     if (isRegisterMode) {
-      // 1. INSCRIPTION (NestJS gère le cryptage automatiquement en BDD)
       if (!authNom || !authPrenom || !authEmail || !authPassword || !authConfirmPassword) {
         return alert("Veuillez remplir tous les champs !");
       }
@@ -120,7 +127,6 @@ export default function Dashboard() {
         setActivationMessage("⚠️ Veuillez contacter le 0564225178 pour finaliser votre inscription et activer votre rôle.");
         setIsRegisterMode(false);
         
-        // Reset
         setAuthPassword("");
         setAuthConfirmPassword("");
       } catch (err) {
@@ -129,10 +135,8 @@ export default function Dashboard() {
       }
 
     } else {
-      // 2. CONNEXION SÉCURISÉE COMPATIBLE CRYPTAGE
       if (!authEmail || !authPassword) return alert("Veuillez remplir tous les champs !");
 
-      // Compte de secours local (Bypass)
       if (authEmail === "admin@admin.com" && authPassword === "admin") {
         sessionStorage.setItem("adminToken", "CONNECTED_SECRET_TOKEN");
         setIsAuthenticated(true);
@@ -140,8 +144,6 @@ export default function Dashboard() {
       }
 
       try {
-        // 🛠️ ÉTAPE UNIQUE SÉCURISÉE : 
-        // On ne compare plus le mot de passe sur le Front. On récupère la liste globale pour chercher l'utilisateur.
         const resUsers = await fetch("http://localhost:3000/users");
         if (!resUsers.ok) throw new Error("Erreur serveur");
         
@@ -152,17 +154,12 @@ export default function Dashboard() {
           return alert("❌ Aucun compte trouvé avec cet e-mail.");
         }
 
-        // 🔐 LE COMPROMIS FRONTEND AUTONOME :
-        // Le mot de passe étant crypté par NestJS, le Frontend valide l'existence du compte, 
-        // mais l'accès final dépend STRICTEMENT de l'activation manuelle de sa propriété 'role' en SQL.
         const roleReel = matchingUser.role ? String(matchingUser.role).toLowerCase().trim() : "en attente";
 
         if (roleReel === "admin" || roleReel === "superadmin") {
-          // Si tu as fait un UPDATE de son rôle à 'admin' dans ta base SQL, il se connecte direct !
           sessionStorage.setItem("adminToken", "CONNECTED_SECRET_TOKEN");
           setIsAuthenticated(true);
         } else {
-          // Si la ligne SQL est restée à sa valeur par défaut 'en attente', il est bloqué ici :
           setActivationMessage("🛑 Accès refusé : Veuillez contacter le 0564225178 pour finaliser votre inscription.");
         }
       } catch (err) {
@@ -177,7 +174,6 @@ export default function Dashboard() {
     setIsAuthenticated(false);
   };
 
-  // 🔒 VISUEL DU FORMULAIRE COMPATIBLE AVEC TON DESIGN
   if (!isAuthenticated) {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "#f3f4f6", fontFamily: "Arial", padding: "20px" }}>
@@ -236,23 +232,25 @@ export default function Dashboard() {
 
   // 🔓 LE DASHBOARD COMPLET
   return (
-    <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
+    <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Arial, sans-serif", backgroundColor: "#f8fafc" }}>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div style={{ flex: 1, padding: "20px", overflowX: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h1 style={{ color: "#0d47a1", fontStyle: "italic", fontWeight: "bold", fontSize: "50px", margin: 0 }}>
+      <div style={{ flex: 1, padding: "30px", overflowX: "auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px", borderBottom: "2px solid #e2e8f0", paddingBottom: "15px" }}>
+          <h1 style={{ color: "#0d47a1", fontStyle: "italic", fontWeight: "bold", fontSize: "42px", margin: 0 }}>
             TABLEAU DE BORD
           </h1>
-          <button onClick={handleLogout} style={{ background: "#6c757d", color: "white", border: "none", padding: "8px 16px", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>
+          <button onClick={handleLogout} style={{ background: "#ef4444", color: "white", border: "none", padding: "10px 20px", cursor: "pointer", borderRadius: "6px", fontWeight: "bold", boxShadow: "0 2px 4px rgba(239, 68, 68, 0.2)" }}>
             🚪 Déconnexion
           </button>
         </div>
 
+        {/* SECTION UTILISATEURS */}
         {activeTab === "users" && (
           <UsersTab users={users} onDeleteUser={handleDeleteUser} />
         )}
 
+        {/* SECTION CERTIFICATS (Contient les informations matrimoniales transitées) */}
         {activeTab === "certificats" && (
           <CertificatsTab 
             certificats={certificats} 
@@ -264,6 +262,7 @@ export default function Dashboard() {
           />
         )}
 
+        {/* SECTION PAIEMENTS */}
         {activeTab === "paiements" && (
           <PaiementsTab 
             paiements={paiements} 
