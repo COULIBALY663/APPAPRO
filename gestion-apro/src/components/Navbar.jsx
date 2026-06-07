@@ -62,8 +62,12 @@ export default function Navbar() {
             <p style={modalText}>Sélectionnez votre méthode préférée pour continuer sur Académie Pro.</p>
 
             <div style={optionsWrapper}>
-              {/* BOUTON GOOGLE ANIMÉ */}
-              <button style={googleOptionBtn} className="google-hover-effect" onClick={() => alert(`Google Auth (${authView.type})`)}>
+              {/* 🚀 BOUTON GOOGLE MODIFIÉ (LIGNE 51) : Redirige vers ton API NestJS */}
+              <button 
+                style={googleOptionBtn} 
+                className="google-hover-effect" 
+                onClick={() => window.location.href = "http://localhost:3000/login/google"}
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" style={{marginRight: '12px'}}>
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -99,41 +103,34 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* ⚡ STYLES CSS COMPLETS AVEC LES NOUVELLES ANIMATIONS AU CLIC */}
+      {/* ⚡ STYLES CSS COMPLETS */}
       <style>{`
         .nav-links, .nav-buttons { display: flex !important; }
 
-        /* ✨ EFFET DE CLIGNOTEMENT / GLOW SUR LES LIENS */
         .clickable-link {
           transition: all 0.2s ease-in-out;
           position: relative;
         }
-        /* Au survol : Devient vert et s'agrandit légèrement */
         .clickable-link:hover {
           color: #22c55e !important;
           transform: scale(1.05);
         }
-        /* AU CLIC (L'effet "clignoter" que tu as demandé) */
         .clickable-link:active {
-          transform: scale(0.92); /* Effet d'enfoncement */
-          opacity: 0.4; /* Clignotement flash instantané */
-          color: #15803d !important; /* Vert plus foncé très bref */
+          transform: scale(0.92);
+          opacity: 0.4;
+          color: #15803d !important;
         }
 
-        /* Effet au clic sur le bouton se connecter */
         .btn-effect-login { transition: all 0.2s ease; }
         .btn-effect-login:hover { background: rgba(34, 197, 94, 0.1); }
         .btn-effect-login:active { transform: scale(0.95); opacity: 0.6; }
 
-        /* Effet au clic sur le bouton s'inscrire */
         .btn-effect-register { transition: all 0.2s ease; }
         .btn-effect-register:hover { background: #16a34a !important; }
         .btn-effect-register:active { transform: scale(0.95); opacity: 0.6; }
 
-        /* Animation Burger Mobile */
         .burger-effect:active { transform: scale(0.85); opacity: 0.5; }
 
-        /* Animations Modal */
         .auth-card-animation {
           animation: slideIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -142,7 +139,6 @@ export default function Navbar() {
           to { transform: translateY(0); opacity: 1; }
         }
 
-        /* Effets de Survol Modal */
         .google-hover-effect { transition: all 0.25s ease; }
         .google-hover-effect:hover {
           background: #f8fafc !important;
@@ -159,7 +155,6 @@ export default function Navbar() {
         }
         .email-hover-effect:active { transform: scale(0.96); opacity: 0.5; }
 
-        /* 📱 RESPONSIVE MOBILE */
         @media (max-width: 1150px) {
           nav { padding: 15px 20px !important; }
           button[style*="font-size: 26px"] { display: block !important; }
@@ -190,7 +185,7 @@ export default function Navbar() {
   );
 }
 
-/* 🎨 STYLES DE BASE (ALIGNEMENT OPTIMISÉ) */
+/* 🎨 STYLES DE BASE */
 const navStyle = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "15px 4%", background: "#02152b", position: "sticky", top: 0, zIndex: 1000, boxShadow: "0 4px 15px rgba(0,0,0,0.3)", flexWrap: "wrap" };
 const logoContainerStyle = { display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" };
 const logoImgStyle = { height: "52px", width: "52px", borderRadius: "10px", objectFit: "cover" };
