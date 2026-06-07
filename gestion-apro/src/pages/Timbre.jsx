@@ -142,7 +142,7 @@ export default function Timbre() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: form.telephone,
-          montant: 2000, 
+          montant: 200, 
           type_service: form.typeDemande, 
           certificat_id: Number(certificatId),
         }),
@@ -224,7 +224,7 @@ export default function Timbre() {
               Merci d'avoir envoyé vos documents. Veuillez maintenant procéder au paiement sécurisé pour valider définitivement votre demande.
             </p>
             <button className="btn-action" style={payButtonStyle} onClick={handlePayNow} disabled={loading}>
-              {loading ? "⏳ Redirection vers PayDunya..." : "💳 Payer maintenant (2 000 FCFA)"}
+              {loading ? "⏳ Redirection vers PayDunya..." : "💳 Payer maintenant (2 00 FCFA)"}
             </button>
           </div>
         )}
