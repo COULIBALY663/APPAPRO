@@ -188,7 +188,7 @@ export default function Certificat() {
         {preview.recto_piece && <img src={preview.recto_piece} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
         
         <label style={{ display: "block" }}>Verso pièce</label>
-        <input type="file" name="verso_piece" onChange={handleFileChange} accept="image/*" capture="environment" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="verso_piece" onChange={handleFileChangitge} accept="image/*" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.verso_piece && <img src={preview.verso_piece} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
 
         <label style={{ display: "block" }}>Acte individuel</label>

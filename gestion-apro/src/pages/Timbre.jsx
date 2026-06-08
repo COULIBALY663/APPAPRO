@@ -106,7 +106,7 @@ export default function Timbre() {
         }
       });
 
-      const res = await fetch("http://appapro.onrender.com/certificat", {
+      const res = await fetch("https://appapro.onrender.com/certificat", {
         method: "POST",
         body: formData,
       });
