@@ -4,29 +4,31 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseModule } from './Database/pg.module';
 import { JwtModule } from '@nestjs/jwt'; 
 
-// === USERS ===
+// === ENTITÉS (MODELS) ===
+import { Users } from './entities/users.entity'; // <-- IMPORTANT: Importez vos entités ici
+import { Login } from './entities/login.entity';
+import { Casier } from './entities/casier.entity';
+import { Certificat } from './entities/certificat.entity';
+import { Paiement } from './entities/paiement.entity';
+
+// === SERVICES & CONTROLLERS ===
 import { UsersServices } from './Services/users.services';
 import { UsersController } from './controllers/users.controllers';
 import { IUsersRepository } from './repository/users.repository';
 
-// === LOGIN / AUTH ===
 import { LoginService } from './Services/Login.service';
 import { ILoginRepository } from './repository/login.repository';
 import { LoginController } from './controllers/login.controllers';
-import { GoogleStrategy } from './Services/google.strategy'; // 🚀 1. AJOUT DE L'IMPORT DE LA STRATÉGIE GOOGLE
+import { GoogleStrategy } from './Services/google.strategy';
 
-// === CASIER JUDICIAIRE ===
 import { CasierController } from './controllers/casier.controllers';
 import { CASIER_REPOSITORY } from './repository/casier.repository';
 import { CasierService } from './Services/casier.service';
 
-// === CERTIFICAT ===
 import { CertificatController } from './controllers/certificat.controllers';
 import { CERTIFICAT_REPOSITORY } from './repository/Certificat.repository';
 import { CertificatService } from './Services/Certificat.service';
 
-// === PAIEMENT ===
-import { Paiement } from './entities/paiement.entity'; 
 import { PaiementController } from './controllers/paiement.controllers'; 
 import { PaiementRepository } from './repository/paiement.repository'; 
 import { PaiementService } from './Services/paiement.service'; 
@@ -45,7 +47,8 @@ import { PaiementService } from './Services/paiement.service';
       signOptions: { expiresIn: '1d' }, 
     }),
 
-    TypeOrmModule.forFeature([Paiement]),
+    // Liste corrigée de toutes les entités
+    TypeOrmModule.forFeature([Paiement, Users, Certificat, Login, Casier]),
   ],
 
   controllers: [
@@ -57,35 +60,12 @@ import { PaiementService } from './Services/paiement.service';
   ],
 
   providers: [
-    // --- Configuration Users ---
-    {
-      provide: IUsersRepository,
-      useClass: UsersServices,
-    },
-
-    // --- Configuration Login ---
-    {
-      provide: ILoginRepository,
-      useClass: LoginService,
-    },
-
-    // --- Configuration Casier ---
-    {
-      provide: CASIER_REPOSITORY,
-      useClass: CasierService,
-    },
-
-    // --- Configuration Certificat ---
-    {
-      provide: CERTIFICAT_REPOSITORY,
-      useClass: CertificatService,
-    },
-
-    // --- Configuration Paiement ---
+    { provide: IUsersRepository, useClass: UsersServices },
+    { provide: ILoginRepository, useClass: LoginService },
+    { provide: CASIER_REPOSITORY, useClass: CasierService },
+    { provide: CERTIFICAT_REPOSITORY, useClass: CertificatService },
     PaiementRepository,
     PaiementService,
-
-    // 🚀 2. ENREGISTREMENT DE LA STRATÉGIE GOOGLE POUR PASSPORT
     GoogleStrategy,
   ],
 })
