@@ -1,11 +1,11 @@
 import axios from "axios";
 
-// Base URL de ton backend NestJS
+// Base URL de votre backend NestJS sur Render avec HTTPS
 const API = axios.create({
-  baseURL: "http://localhost:3000", // ton backend
+  baseURL: "https://appapro.onrender.com",
 });
 
-// Intercepteur pour ajouter token si connecté
+// Intercepteur pour ajouter le token JWT à chaque requête si l'utilisateur est connecté
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -13,5 +13,18 @@ API.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Intercepteur de réponse pour gérer les erreurs globalement (optionnel mais conseillé)
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.log("Session expirée ou non autorisé.");
+      localStorage.removeItem("token");
+      // Optionnel : window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default API;
