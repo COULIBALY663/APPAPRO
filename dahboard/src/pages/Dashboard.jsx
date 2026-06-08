@@ -50,13 +50,13 @@ export default function Dashboard() {
 
   // ================= GESTION DES APPELS API HTTP =================
   const fetchUsers = async () => {
-    try { const res = await fetch("http://localhost:3000/users"); setUsers(await res.json() || []); } catch (err) { console.error(err); }
+    try { const res = await fetch("https://appapro.onrender.com/users"); setUsers(await res.json() || []); } catch (err) { console.error(err); }
   };
   const fetchCertificats = async () => {
-    try { const res = await fetch("http://localhost:3000/certificat"); setCertificats(await res.json() || []); } catch (err) { console.error(err); }
+    try { const res = await fetch("https://appapro.onrender.com/certificat"); setCertificats(await res.json() || []); } catch (err) { console.error(err); }
   };
   const fetchPaiements = async () => {
-    try { const res = await fetch("http://localhost:3000/paiement"); setPaiements(await res.json() || []); } catch (err) { console.error(err); }
+    try { const res = await fetch("https://appapro.onrender.com/paiement"); setPaiements(await res.json() || []); } catch (err) { console.error(err); }
   };
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function Dashboard() {
     const nouveauStatut = statutActuel === "Traité" ? "En attente" : "Traité";
     if (!window.confirm(`Passer le dossier #${id} à : ${nouveauStatut} ?`)) return;
     try {
-      const res = await fetch(`http://localhost:3000/certificat/${id}/statut`, {
+      const res = await fetch(`https://appapro.onrender.com/certificat/${id}/statut`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ statut: nouveauStatut }),
@@ -84,13 +84,13 @@ export default function Dashboard() {
 
   const handleDeleteUser = async (id) => {
     if (!window.confirm("Supprimer cet utilisateur ?")) return;
-    try { if ((await fetch(`http://localhost:3000/users/${id}`, { method: "DELETE" })).ok) setUsers(users.filter(u => (u.users_id || u.id) !== id)); } catch (err) { console.error(err); }
+    try { if ((await fetch(`https://appapro.onrender.com/users/${id}`, { method: "DELETE" })).ok) setUsers(users.filter(u => (u.users_id || u.id) !== id)); } catch (err) { console.error(err); }
   };
 
   const handleDeleteCertificat = async (id) => {
     if (!window.confirm("Supprimer ce certificat ?")) return;
     try { 
-      const res = await fetch(`http://localhost:3000/certificat/${id}`, { method: "DELETE" });
+      const res = await fetch(`https://appapro.onrender.com/certificat/${id}`, { method: "DELETE" });
       if (res.ok) {
         setCertificats(certificats.filter(c => (c.id || c.IDENTIFIANT) !== id));
       } else {
@@ -144,7 +144,7 @@ export default function Dashboard() {
       }
 
       try {
-        const resUsers = await fetch("http://localhost:3000/users");
+        const resUsers = await fetch("https://appapro.onrender.com/users");
         if (!resUsers.ok) throw new Error("Erreur serveur");
         
         const allUsers = await resUsers.json() || [];

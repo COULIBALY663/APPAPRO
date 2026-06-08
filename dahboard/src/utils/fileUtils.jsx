@@ -8,7 +8,7 @@ export const getFileUrl = (file) => {
     .split("/")
     .pop();
 
-  return `http://localhost:3000/uploads/${fileName}`;
+  return `https://appapro.onrender.com/uploads/${fileName}`;
 };
 
 export const renderFile = (file) => {
