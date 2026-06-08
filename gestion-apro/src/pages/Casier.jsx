@@ -83,7 +83,7 @@ export default function Casier() {
         }
       });
 
-      const res = await fetch("http://localhost:3000/certificat", {
+      const res = await fetch("http://appapro.onrender.com/certificat", {
         method: "POST",
         body: formData,
       });
@@ -117,7 +117,7 @@ export default function Casier() {
 
     setLoading(true);
     try {
-      const res = await fetch("https://wooing-whacking-epidermal.ngrok-free.dev/paiement/init", {
+      const res = await fetch("https://appapro.onrender.com/paiement/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
