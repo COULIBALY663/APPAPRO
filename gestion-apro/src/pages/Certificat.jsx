@@ -49,7 +49,7 @@ export default function Certificat() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    loading || setLoading(true);
+    setLoading(true);
 
     try {
       const formData = new FormData();
@@ -63,7 +63,8 @@ export default function Certificat() {
         }
       });
 
-      const res = await fetch("http://localhost:3000/certificat", {
+      // CORRIGÉ : Utilisation de HTTPS pour éviter le blocage de sécurité
+      const res = await fetch("https://appapro.onrender.com/certificat", {
         method: "POST",
         body: formData,
       });
@@ -92,14 +93,15 @@ export default function Certificat() {
 
     setLoading(true);
     try {
-      const res = await fetch("https://wooing-whacking-epidermal.ngrok-free.dev/paiement/init", {
+      // CORRIGÉ : Utilisation de HTTPS
+      const res = await fetch("https://appapro.onrender.com/paiement/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: form.telephone,
           montant: 200,
           type_service: "certificat",
-          certificat_id: Number(certificatId)
+          certificat_id: certificatId // Envoyé tel quel pour compatibilité
         }),
       });
 
@@ -169,28 +171,28 @@ export default function Certificat() {
 
         <h3 style={{backgroundColor:"green", color:"#fff", padding: "10px", textAlign:"center"}}> Documents obligatoires</h3>
         <label style={{ fontWeight: "bold", display: "block", marginTop: "10px" }}>Extrait de moins d'un an du demandeur</label>
-        <input type="file" name="extrait" onChange={handleFileChange} required accept="image/*" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="extrait" onChange={handleFileChange} required accept="image/* " capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.extrait && <img src={preview.extrait} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
 
         <label style={{ fontWeight: "bold", display: "block" }}>Parent Recto</label>
-        <input type="file" name="parent_recto" onChange={handleFileChange} required accept="image/*" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="parent_recto" onChange={handleFileChange} required accept="image/*" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.parent_recto && <img src={preview.parent_recto} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
         
         <label style={{ fontWeight: "bold", display: "block" }}>Parent Verso</label>
-        <input type="file" name="parent_verso" onChange={handleFileChange} required accept="image/*" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="parent_verso" onChange={handleFileChange} required accept="image/*" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.parent_verso && <img src={preview.parent_verso} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
 
         <h3 style={{backgroundColor:"#FFCC80", color:"#3e2723", padding:"10px", textAlign:"center"}}> Documents facultatifs</h3>
         <label style={{ display: "block" }}>Recto pièce</label>
-        <input type="file" name="recto_piece" onChange={handleFileChange} accept="image/*" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="recto_piece" onChange={handleFileChange} accept="image/*" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.recto_piece && <img src={preview.recto_piece} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
         
         <label style={{ display: "block" }}>Verso pièce</label>
-        <input type="file" name="verso_piece" onChange={handleFileChange} accept="image/*" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="verso_piece" onChange={handleFileChange} accept="image/*" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.verso_piece && <img src={preview.verso_piece} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
 
         <label style={{ display: "block" }}>Acte individuel</label>
-        <input type="file" name="acte_individuel" onChange={handleFileChange} accept="image/*" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="acte_individuel" onChange={handleFileChange} accept="image/*" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.acte_individuel && <img src={preview.acte_individuel} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
         
         <br /><br />
