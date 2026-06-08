@@ -13,7 +13,7 @@ export class CertificatService implements ICertificatRepository {
   // ➕ CREATE (Corrigé : Les 11 paramètres sont désormais bien fournis)
   async createCertificat(body: any, files: any) {
     const result = await this.db.query(
-      `INSERT INTO certificat (nom, prenom, telephone, extrait, parent_recto, parent_verso, recto_piece, verso_piece, acte_individuel, situationmatrimoniale , nomConjoint)
+      `INSERT INTO certificat (nom, prenom, telephone, extrait, parent_recto, parent_verso, recto_piece, verso_piece, acte_individuel, situationmatrimoniale , nomConjoint")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
       [
         body.nom, 
