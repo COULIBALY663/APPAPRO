@@ -4,8 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseModule } from './Database/pg.module';
 import { JwtModule } from '@nestjs/jwt'; 
 
-// === ENTITÉS (MODELS) ===
-import { Users } from './entities/users.entity'; // <-- IMPORTANT: Importez vos entités ici
+// === ENTITÉS ===
+import { Users } from './entities/users.entity';
 import { Login } from './entities/login.entity';
 import { Casier } from './entities/casier.entity';
 import { Certificat } from './entities/certificat.entity';
@@ -40,14 +40,11 @@ import { PaiementService } from './Services/paiement.service';
       isGlobal: true
     }),
     DatabaseModule,
-    
     JwtModule.register({
       global: true, 
       secret: process.env.JWT_SECRET || 'CLE_SECRET_PROVISOIRE_ACADEMIE_PRO_2026',
       signOptions: { expiresIn: '1d' }, 
     }),
-
-    // Liste corrigée de toutes les entités
     TypeOrmModule.forFeature([Paiement, Users, Certificat, Login, Casier]),
   ],
 
@@ -60,13 +57,20 @@ import { PaiementService } from './Services/paiement.service';
   ],
 
   providers: [
+    // Déclaration des classes pour résoudre UnknownDependenciesException
+    UsersServices,
+    LoginService,
+    CasierService,
+    CertificatService,
+    PaiementService,
+    PaiementRepository,
+    GoogleStrategy,
+
+    // Déclaration des interfaces (alias)
     { provide: IUsersRepository, useClass: UsersServices },
     { provide: ILoginRepository, useClass: LoginService },
     { provide: CASIER_REPOSITORY, useClass: CasierService },
     { provide: CERTIFICAT_REPOSITORY, useClass: CertificatService },
-    PaiementRepository,
-    PaiementService,
-    GoogleStrategy,
   ],
 })
 export class AppModule { }

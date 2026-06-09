@@ -1,10 +1,6 @@
-import { 
-  Controller, Get, Post, Delete, Body, Param, Req, Res, UseGuards 
-} from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-
-// 🚀 IMPORT CORRIGÉ : Injection directe des services
 import { LoginService } from '../Services/Login.service';
 import { UsersServices } from '../Services/users.services';
 import { CreateLoginDto } from '../Dtos/login.dtos';
@@ -18,8 +14,6 @@ export class LoginController {
     private readonly loginService: LoginService,
     private readonly usersService: UsersServices,
   ) {}
-
-  // --- ROUTES CLASSIQUES ---
 
   @Post()
   @ApiBody({ type: CreateLoginDto })
@@ -35,8 +29,6 @@ export class LoginController {
     return this.loginService.DeleteLogin(id);
   }
 
-  // --- ROUTES GOOGLE ---
-
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) {}
@@ -46,17 +38,15 @@ export class LoginController {
   async googleAuthRedirect(@Req() req, @Res() res) {
     try {
       const googleProfile = req.user;
-
-      // Utilisation directe des services TypeORM
       const userInDb = await this.usersService.findOrCreateGoogleUser(googleProfile);
       const session = await this.loginService.validateAndGenerateToken(userInDb);
 
-      // Note: En prod, remplacez localhost par votre URL de domaine réelle
-      return res.redirect(`${process.env.FRONTEND_URL}/dashboard?token=${session.access_token}`);
-      
+      const redirectUrl = process.env.FRONTEND_URL || 'https://dahboard.onrender.com';
+      return res.redirect(`${redirectUrl}/dashboard?token=${session.access_token}`);
     } catch (error) {
       console.error("Erreur authentification Google :", error);
-      return res.redirect(`${process.env.FRONTEND_URL}/?error=google_failed`);
+      const baseUrl = process.env.FRONTEND_URL || 'https://dahboard.onrender.com';
+      return res.redirect(`${baseUrl}/?error=google_failed`);
     }
   }
 }
