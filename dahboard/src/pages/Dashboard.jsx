@@ -144,7 +144,7 @@ export default function Dashboard() {
       }
 
       try {
-        const resUsers = await fetch("https://appapro.onrender.com/users");
+        const resUsers = await fetch("https://appapro.onrender.com/registerUser");
         if (!resUsers.ok) throw new Error("Erreur serveur");
         
         const allUsers = await resUsers.json() || [];
