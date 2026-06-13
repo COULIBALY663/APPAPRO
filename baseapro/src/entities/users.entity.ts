@@ -11,9 +11,12 @@ export class Users {
   @Column()
   prenom!: string;
 
+  @Column({ default: 'USER' }) // Rôle par défaut (notez le singulier 'USER')
+  role!: string;
+
   @Column({ unique: true }) // Email unique pour éviter les doublons
   email!: string;
 
   @Column()
   password!: string;
-} 
+}

@@ -1,113 +1,72 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Pool } from 'pg';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { IUsersRepository } from '../repository/users.repository';
 import { CreateUsersDto, UpdateUsersDto } from '../Dtos/users.dtos';
-import { users } from '../models/users.models';
-import * as bcrypt from 'bcrypt';
+import { Users } from '../entities/users.entity'; // 🚀 IMPORT CORRIGÉ
 
 @Injectable()
 export class UsersServices implements IUsersRepository {
-
   constructor(
-    @Inject('PG_POOL')
-    private readonly db: Pool,
+    @InjectRepository(Users)
+    private readonly usersRepository: Repository<Users>,
   ) {}
 
-  async findByUsersId(users_id: number): Promise<users | null> {
-    const result = await this.db.query(
-      'SELECT * FROM users WHERE users_id = $1',
-      [users_id],
-    );
-    return result.rows[0] || null;
+  async findByUsersId(users_id: number): Promise<Users | null> {
+    return await this.usersRepository.findOne({ where: { users_id } });
   }
 
-  async findByEmail(email: string): Promise<users | null> {
-    const result = await this.db.query(
-      'SELECT * FROM users WHERE email = $1',
-      [email],
-    );
-    return result.rows[0] || null;
+  async findByEmail(email: string): Promise<Users | null> {
+    return await this.usersRepository.findOne({ where: { email } });
   }
 
-  async createUsers(data: CreateUsersDto): Promise<users> {
+  async createUsers(data: CreateUsersDto): Promise<Users> {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(data.password, salt);
 
-    const result = await this.db.query(
-      `INSERT INTO users (prenom, nom, email, password)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [data.prenom, data.nom, data.email, hashedPassword],
-    );
-
-    return result.rows[0];
+    const newUser = this.usersRepository.create({
+      ...data,
+      password: hashedPassword,
+    });
+    return await this.usersRepository.save(newUser);
   }
 
-  // 🚀 MÉTHODE GOOGLE ENTIÈREMENT SÉCURISÉE ET CONNECTÉE À TA BASE DE DONNÉES
-  async findOrCreateGoogleUser(googleUser: { email: string; prenom: string; nom: string }): Promise<users> {
-    // 1. On vérifie d'abord si l'utilisateur existe déjà en BDD avec cet email
+  async findOrCreateGoogleUser(googleUser: { email: string; prenom: string; nom: string }): Promise<Users> {
     const userExists = await this.findByEmail(googleUser.email);
-    if (userExists) {
-      console.log(`Utilisateur Google existant trouvé : ${userExists.email}`);
-      return userExists; // Si oui, on le renvoie directement (Connexion réussie)
-    }
+    if (userExists) return userExists;
 
-    // 2. Si non, on l'inscrit automatiquement en générant un mot de passe sécurisé et masqué
-    console.log(`Nouvel utilisateur Google détecté (${googleUser.email}), création en cours...`);
     const salt = await bcrypt.genSalt(10);
     const placeholderPassword = await bcrypt.hash(`GOOGLE_AUTH_SECURE_${Math.random()}`, salt);
 
-    const result = await this.db.query(
-      `INSERT INTO users (prenom, nom, email, password)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [googleUser.prenom, googleUser.nom, googleUser.email, placeholderPassword],
-    );
-
-    return result.rows[0];
+    const newUser = this.usersRepository.create({
+      ...googleUser,
+      password: placeholderPassword,
+    });
+    return await this.usersRepository.save(newUser);
   }
 
-  async getAllUsers(): Promise<users[]> {
-    const result = await this.db.query(
-      'SELECT * FROM users ORDER BY users_id ASC'
-    );
-    return result.rows;
+  async getAllUsers(): Promise<Users[]> {
+    return await this.usersRepository.find({ order: { users_id: 'ASC' } });
   }
 
-  async updateUsers(users_id: number, data: UpdateUsersDto): Promise<users | null> {
+  async updateUsers(users_id: number, data: UpdateUsersDto): Promise<Users | null> {
     let hashedPassword = data.password;
-
     if (data.password) {
       const salt = await bcrypt.genSalt(10);
       hashedPassword = await bcrypt.hash(data.password, salt);
     }
 
-    const result = await this.db.query(
-      `UPDATE users
-       SET prenom = $1,
-           nom = $2,
-           email = $3,
-           password = $4
-       WHERE users_id = $5
-       RETURNING *`,
-      [
-        data.prenom,
-        data.nom,
-        data.email,
-        hashedPassword,
-        users_id,
-      ],
-    );
+    await this.usersRepository.update(users_id, {
+      ...data,
+      ...(hashedPassword && { password: hashedPassword }),
+    });
 
-    return result.rows[0] || null;
+    return await this.findByUsersId(users_id);
   }
 
   async deleteUsers(users_id: number): Promise<boolean> {
-    const result = await this.db.query(
-      'DELETE FROM users WHERE users_id = $1',
-      [users_id],
-    );
-
-    return (result.rowCount ?? 0) > 0;
+    const result = await this.usersRepository.delete(users_id);
+    return (result.affected ?? 0) > 0;
   }
 }
