@@ -10,7 +10,6 @@ async function bootstrap() {
   // Configuration des domaines autorisés
   const allowedOrigins = [
     'https://apro-client.onrender.com',
-    'https://dahboard.onrender.com',
     process.env.FRONTEND_URL
   ].filter(Boolean);
 

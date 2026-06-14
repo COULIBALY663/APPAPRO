@@ -41,7 +41,7 @@ export class LoginController {
       const userInDb = await this.usersService.findOrCreateGoogleUser(googleProfile);
       const session = await this.loginService.validateAndGenerateToken(userInDb);
 
-      const redirectUrl = process.env.FRONTEND_URL || 'https:apro-client.onrender.com.';
+      const redirectUrl = process.env.FRONTEND_URL || 'https://apro-client.onrender.com';
       return res.redirect(`${redirectUrl}/dashboard?token=${session.access_token}`);
     } catch (error) {
       console.error("Erreur authentification Google :", error);
