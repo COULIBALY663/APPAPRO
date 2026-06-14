@@ -29,24 +29,28 @@ export class LoginController {
     return this.loginService.DeleteLogin(id);
   }
 
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth(@Req() req) {}
-
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
     try {
       const googleProfile = req.user;
+      if (!googleProfile) {
+        throw new Error("Aucun profil utilisateur reçu de Google");
+      }
+
       const userInDb = await this.usersService.findOrCreateGoogleUser(googleProfile);
       const session = await this.loginService.validateAndGenerateToken(userInDb);
 
       const redirectUrl = process.env.FRONTEND_URL || 'https://apro-client.onrender.com';
       return res.redirect(`${redirectUrl}/dashboard?token=${session.access_token}`);
     } catch (error) {
-      console.error("Erreur authentification Google :", error);
+      // Log complet dans la console Render pour le débogage
+      console.error("DÉTAIL ERREUR AUTH GOOGLE :", error);
+      
       const baseUrl = process.env.FRONTEND_URL || 'https://apro-client.onrender.com';
-      return res.redirect(`${baseUrl}/?error=google_failed`);
+      // Encodage du message d'erreur pour l'afficher proprement dans le navigateur
+      const errorMessage = encodeURIComponent(error.message || 'Erreur inconnue');
+      return res.redirect(`${baseUrl}/?error=${errorMessage}`);
     }
   }
 }
