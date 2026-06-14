@@ -41,11 +41,11 @@ export class LoginController {
       const userInDb = await this.usersService.findOrCreateGoogleUser(googleProfile);
       const session = await this.loginService.validateAndGenerateToken(userInDb);
 
-      const redirectUrl = process.env.FRONTEND_URL || 'https://dahboard.onrender.com';
+      const redirectUrl = process.env.FRONTEND_URL || 'https:apro-client.onrender.com.';
       return res.redirect(`${redirectUrl}/dashboard?token=${session.access_token}`);
     } catch (error) {
       console.error("Erreur authentification Google :", error);
-      const baseUrl = process.env.FRONTEND_URL || 'https://dahboard.onrender.com';
+      const baseUrl = process.env.FRONTEND_URL || 'https://apro-client.onrender.com';
       return res.redirect(`${baseUrl}/?error=google_failed`);
     }
   }
