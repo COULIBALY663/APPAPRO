@@ -1,11 +1,12 @@
 import axios from "axios";
 
 // Utilisez la variable d'environnement définie sur Render
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://appapro.onrender.com";
+// Remplacez votre ancien POST vers /auth/register par :
+const API_BASE_URL = "https://appapro.onrender.com";
 
 export const registerUser = async (userData) => {
-  // Ajustez ici la route réelle attendue par votre backend (ex: /auth/register ou /users)
-  const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
+  // L'URL correcte est /users, car c'est là que votre contrôleur NestJS attend la requête POST
+  const response = await axios.post(`${API_BASE_URL}/users`, userData);
   return response.data;
 };
 
