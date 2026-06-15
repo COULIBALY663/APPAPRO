@@ -10,6 +10,7 @@ async function bootstrap() {
   // Configuration des domaines autorisés
   const allowedOrigins = [
     'https://apro-client.onrender.com',
+    'https://pageadminapro.onrender.com',
     process.env.FRONTEND_URL
   ].filter(Boolean);
 
