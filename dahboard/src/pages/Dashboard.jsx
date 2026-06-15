@@ -15,27 +15,34 @@ export default function Dashboard() {
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
+
     if (isRegisterMode) {
       if (form.password !== form.confirmPassword) return alert("Les mots de passe ne correspondent pas !");
       try {
         await registerUser({ prenom: form.prenom, nom: form.nom, email: form.email, password: form.password });
-        // Message spécifique demandé
-        alert("Inscription avec succès ! Veuillez contacter le 0564225178 pour vous connecter.");
+        alert("Inscription avec succès ! Veuillez contacter le 0564225178 pour valider votre compte.");
         setIsRegisterMode(false);
       } catch (err) { alert("Erreur lors de l'inscription."); }
     } else {
       try {
-        const res = await fetch(`${API_URL}/users`);
-        const allUsers = await res.json();
-        const user = allUsers.find(u => u.email === form.email);
+        // Appel à votre LoginController sur le backend
+        const response = await fetch(`${API_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: form.email, password: form.password })
+        });
 
-        if (user && user.password === form.password) {
-          const role = user.role ? String(user.role).toLowerCase().trim() : "";
-          if (role === "admin" || role === "superadmin") {
+        if (response.ok) {
+          // On récupère aussi la liste des utilisateurs pour vérifier le rôle
+          const userRes = await fetch(`${API_URL}/users`);
+          const users = await userRes.json();
+          const user = users.find(u => u.email === form.email);
+
+          if (user && (user.role === 'admin' || user.role === 'superadmin')) {
             sessionStorage.setItem("adminToken", "TRUE");
             setIsAuthenticated(true);
           } else {
-            alert("Accès refusé : votre compte est en attente de validation. Contactez le 0564225178.");
+            alert("Accès refusé : vous n'êtes pas administrateur ou votre compte est en attente. Contactez le 0564225178.");
           }
         } else {
           alert("E-mail ou mot de passe incorrect.");
@@ -77,7 +84,9 @@ export default function Dashboard() {
             <h1>TABLEAU DE BORD</h1>
             <button onClick={() => {sessionStorage.clear(); window.location.reload();}} style={styles.logoutBtn}>Déconnexion</button>
         </header>
-        {/* Vos composants de tabs ici... */}
+        {activeTab === "users" && <UsersTab />}
+        {activeTab === "certificats" && <CertificatsTab />}
+        {activeTab === "paiements" && <PaiementsTab />}
       </main>
     </div>
   );
