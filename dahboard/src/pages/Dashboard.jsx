@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { registerUser } from "../services/userService.js"; 
 import UsersTab from "../components/UsersTab";
@@ -25,29 +25,30 @@ export default function Dashboard() {
       } catch (err) { alert("Erreur lors de l'inscription."); }
     } else {
       try {
-        // Appel à votre LoginController sur le backend
-        const response = await fetch(`${API_URL}/login`, {
+        // 1. Vérification des identifiants via l'API Login
+        const loginRes = await fetch(`${API_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: form.email, password: form.password })
         });
 
-        if (response.ok) {
-          // On récupère aussi la liste des utilisateurs pour vérifier le rôle
-          const userRes = await fetch(`${API_URL}/users`);
-          const users = await userRes.json();
-          const user = users.find(u => u.email === form.email);
+        if (!loginRes.ok) return alert("E-mail ou mot de passe incorrect.");
 
-          if (user && (user.role === 'admin' || user.role === 'superadmin')) {
-            sessionStorage.setItem("adminToken", "TRUE");
-            setIsAuthenticated(true);
-          } else {
-            alert("Accès refusé : vous n'êtes pas administrateur ou votre compte est en attente. Contactez le 0564225178.");
-          }
+        // 2. Vérification du rôle dans la table users
+        const userRes = await fetch(`${API_URL}/users`);
+        const users = await userRes.json();
+        const user = users.find(u => u.email === form.email);
+
+        if (user && (String(user.role).toLowerCase().trim() === 'admin' || String(user.role).toLowerCase().trim() === 'superadmin')) {
+          sessionStorage.setItem("adminToken", "TRUE");
+          setIsAuthenticated(true);
         } else {
-          alert("E-mail ou mot de passe incorrect.");
+          alert("Accès refusé : compte non autorisé. Contactez le 0564225178.");
         }
-      } catch (err) { alert("Erreur de connexion au serveur."); }
+      } catch (err) { 
+        console.error(err);
+        alert("Erreur de connexion au serveur."); 
+      }
     }
   };
 
