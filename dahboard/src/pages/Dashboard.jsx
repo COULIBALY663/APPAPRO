@@ -10,12 +10,8 @@ const API_URL = import.meta.env.VITE_API_URL || "https://appapro.onrender.com";
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!sessionStorage.getItem("adminToken"));
   const [isRegisterMode, setIsRegisterMode] = useState(false);
-  
-  // États simplifiés pour le formulaire
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", password: "", confirmPassword: "" });
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem("activeTab") || "users");
-  
-  // ... (Conservez vos états users, certificats, paiements ici)
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
@@ -23,14 +19,28 @@ export default function Dashboard() {
       if (form.password !== form.confirmPassword) return alert("Les mots de passe ne correspondent pas !");
       try {
         await registerUser({ prenom: form.prenom, nom: form.nom, email: form.email, password: form.password });
-        alert("Inscription réussie !");
+        // Message spécifique demandé
+        alert("Inscription avec succès ! Veuillez contacter le 0564225178 pour vous connecter.");
         setIsRegisterMode(false);
       } catch (err) { alert("Erreur lors de l'inscription."); }
     } else {
-      if (form.email === "admin@admin.com" && form.password === "admin") {
-        sessionStorage.setItem("adminToken", "TRUE");
-        setIsAuthenticated(true);
-      } else { alert("Accès refusé."); }
+      try {
+        const res = await fetch(`${API_URL}/users`);
+        const allUsers = await res.json();
+        const user = allUsers.find(u => u.email === form.email);
+
+        if (user && user.password === form.password) {
+          const role = user.role ? String(user.role).toLowerCase().trim() : "";
+          if (role === "admin" || role === "superadmin") {
+            sessionStorage.setItem("adminToken", "TRUE");
+            setIsAuthenticated(true);
+          } else {
+            alert("Accès refusé : votre compte est en attente de validation. Contactez le 0564225178.");
+          }
+        } else {
+          alert("E-mail ou mot de passe incorrect.");
+        }
+      } catch (err) { alert("Erreur de connexion au serveur."); }
     }
   };
 
@@ -49,7 +59,6 @@ export default function Dashboard() {
             <input type="email" style={styles.input} placeholder="E-mail" onChange={(e) => setForm({...form, email: e.target.value})} required />
             <input type="password" style={styles.input} placeholder="Mot de passe" onChange={(e) => setForm({...form, password: e.target.value})} required />
             {isRegisterMode && <input type="password" style={styles.input} placeholder="Confirmer mot de passe" onChange={(e) => setForm({...form, confirmPassword: e.target.value})} required />}
-            
             <button type="submit" style={styles.button}>{isRegisterMode ? "S'inscrire" : "Se connecter"}</button>
           </form>
           <p onClick={() => setIsRegisterMode(!isRegisterMode)} style={styles.toggleText}>
@@ -68,13 +77,12 @@ export default function Dashboard() {
             <h1>TABLEAU DE BORD</h1>
             <button onClick={() => {sessionStorage.clear(); window.location.reload();}} style={styles.logoutBtn}>Déconnexion</button>
         </header>
-        {/* Vos Tabs ici... */}
+        {/* Vos composants de tabs ici... */}
       </main>
     </div>
   );
 }
 
-// Design system simplifié
 const styles = {
   authContainer: { height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f2f5" },
   authCard: { background: "white", padding: "40px", borderRadius: "12px", boxShadow: "0 10px 25px rgba(0,0,0,0.1)", width: "100%", maxWidth: "400px" },
