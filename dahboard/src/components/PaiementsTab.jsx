@@ -1,12 +1,15 @@
 import React from "react";
 
 export default function PaiementsTab({ paiements, getPaymentBadgeStyle, translatePaymentStatus }) {
+  // Sécurité : si paiements est undefined/null, on utilise un tableau vide
+  const safePaiements = Array.isArray(paiements) ? paiements : [];
+
   return (
     <div>
       <h2 style={{ backgroundColor: "#0d47a1", fontWeight: "bold", color: 'white', padding: "8px 12px", borderRadius: "4px" }}>
         💳 Historique des Transactions (PayDunya)
       </h2>
-      <p style={{ fontWeight: "bold", color: "#555" }}>Nombre de transactions : {paiements?.length || 0}</p>
+      <p style={{ fontWeight: "bold", color: "#555" }}>Nombre de transactions : {safePaiements.length}</p>
       
       <table border="1" width="100%" cellPadding="10" style={{ borderCollapse: "collapse", width: "100%", fontSize: "14px", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
         <thead>
@@ -23,7 +26,7 @@ export default function PaiementsTab({ paiements, getPaymentBadgeStyle, translat
           </tr>
         </thead>
         <tbody>
-          {paiements.map((p) => {
+          {safePaiements.map((p) => {
             let receiptUrl = null;
             try {
               if (p.invoice_data) {

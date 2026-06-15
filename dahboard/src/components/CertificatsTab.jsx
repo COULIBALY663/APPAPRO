@@ -2,12 +2,16 @@ import React from "react";
 import { renderFile } from "../utils/fileUtils";
 
 export default function CertificatsTab({ certificats, paiements, onValiderDossier, onDeleteCertificat, getPaymentBadgeStyle, translatePaymentStatus }) {
+  // Sécurité : initialisation par défaut pour éviter le plantage
+  const safeCertificats = Array.isArray(certificats) ? certificats : [];
+  const safePaiements = Array.isArray(paiements) ? paiements : [];
+
   return (
     <div>
       <h2 style={{ fontSize: "50px", textAlign: "center", backgroundColor: "orange", fontWeight: "bold", color: 'white', padding: "8px 12px", borderRadius: "4px" }}>
         📄 Gestion des Certificats
       </h2>
-      <p style={{ fontWeight: "bold", color: "#555" }}>Total: {certificats?.length || 0}</p>
+      <p style={{ fontWeight: "bold", color: "#555" }}>Total: {safeCertificats.length}</p>
       
       <div style={{ overflowX: "auto", width: "100%" }}>
         <table border="1" cellPadding="8" style={{ borderCollapse: "collapse", width: "100%", fontSize: "13px" }}>
@@ -29,11 +33,11 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
             </tr>
           </thead>
           <tbody>
-            {certificats.map((c) => {
+            {safeCertificats.map((c) => {
               const id = c.id || c.IDENTIFIANT;
 
-              // 🎯 Rapprochement par ID ultra-sécurisé
-              const paiementLie = paiements.find((p) => {
+              // Utilisation de safePaiements pour le find
+              const paiementLie = safePaiements.find((p) => {
                 const pCertificatId = p.certificat_id || p.certificatId || p.certificatIdCertificat;
                 const idDepuisObjet = p.certificat && typeof p.certificat === 'object' ? (p.certificat.id || p.certificat.IDENTIFIANT) : null;
                 const finalPaiementId = pCertificatId || idDepuisObjet;
@@ -64,7 +68,6 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                       <span style={{ fontSize: "11px", color: "#777" }}>{c.email || "Non disponible"}</span>
                     </td>
                     
-                    {/* 🆕 Situation Matrimoniale (Laissée vide si pas de donnée) */}
                     <td style={{ textAlign: "center" }}>
                       {c.situationmatrimoniale && (
                         <span style={{ backgroundColor: "#e0f2fe", color: "#0369a1", padding: "4px 8px", borderRadius: "4px", fontWeight: "500" }}>
@@ -73,7 +76,6 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                       )}
                     </td>
 
-                    {/* 🆕 Nom du Conjoint (Laissé vide si pas de donnée) */}
                     <td style={{ textAlign: "center", color: "#334155" }}>
                       {c.nomconjoint || ""}
                     </td>
@@ -102,7 +104,6 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                     </td>
                   </tr>
 
-                  {/* Ligne jaune d'informations financières */}
                   <tr style={{ backgroundColor: "#fdf8e2" }}>
                     <td colSpan="13" style={{ padding: "8px 15px", borderTop: "none" }}>
                       {paiementLie ? (
@@ -121,7 +122,7 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                         </div>
                       ) : (
                         <div style={{ fontSize: "12px", color: "#6c757d", fontStyle: "italic" }}>
-                          ❌ Aucun paiement PayDunya associé trouvé pour ce dossier.
+                          ❌ Aucun paiement associé trouvé.
                         </div>
                       )}
                     </td>
