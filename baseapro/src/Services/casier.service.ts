@@ -1,107 +1,60 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Pool } from 'pg';
-import type { ICasierRepository } from '../repository/casier.repository';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, DeepPartial } from 'typeorm';
+import { Casier } from '../entities/casier.entity';
 
 @Injectable()
-export class CasierService implements ICasierRepository {
+export class CasierService {
+  constructor(
+    @InjectRepository(Casier)
+    private readonly casierRepository: Repository<Casier>,
+  ) {}
 
-    constructor(
-        @Inject('PG_POOL')
-        private readonly db: Pool,
-    ) { }
+  // ➕ CREATE : Enregistre un nouveau casier avec les chemins de fichiers
+  async createCasier(body: any, files: any): Promise<Casier> {
+    const donnees = {
+      ...body,
+      extrait: files?.extrait?.[0]?.path || null,
+      recto_piece: files?.recto_piece?.[0]?.path || null,
+      verso_piece: files?.verso_piece?.[0]?.path || null,
+      acte_individuel: files?.acte_individuel?.[0]?.path || null,
+    } as DeepPartial<Casier>;
 
-    // ➕ CREATE
-    async createCasier(body: any, files: any) {
+    const nouveau = this.casierRepository.create(donnees);
+    return await this.casierRepository.save(nouveau);
+  }
 
-        const result = await this.db.query(
-            `INSERT INTO casier (
-        nom,
-        prenom,
-        telephone,
-        extrait,
-        recto_piece,
-        verso_piece,
-        acte_individuel
-      )
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
-      RETURNING *`,
-            [
-                body.nom,
-                body.prenom,
-                body.telephone,
+  // 📄 GET ALL : Liste tous les casiers par ordre décroissant
+  async getAllCasiers(): Promise<Casier[]> {
+    return await this.casierRepository.find({ order: { user_id: 'DESC' } });
+  }
 
-                files?.extrait?.[0]?.path || null,
-                files?.recto_piece?.[0]?.path || null,
-                files?.verso_piece?.[0]?.path || null,
-                files?.acte_individuel?.[0]?.path || null,
-            ],
-        );
+  // 🔍 GET BY ID : Recherche un casier spécifique
+  async findByCasierId(id: string): Promise<Casier> {
+    const casier = await this.casierRepository.findOne({ where: { user_id: id } });
+    if (!casier) throw new NotFoundException('Casier introuvable');
+    return casier;
+  }
 
-        return result.rows[0];
-    }
+  // ✏️ UPDATE : Met à jour les informations et les chemins de fichiers
+  async updateCasier(id: string, body: any, files: any): Promise<Casier | null> {
+    const casier = await this.findByCasierId(id);
+    
+    const updateData = {
+      ...body,
+      extrait: files?.extrait?.[0]?.path || body.extrait || casier.extrait,
+      recto_piece: files?.recto_piece?.[0]?.path || body.recto_piece || casier.recto_piece,
+      verso_piece: files?.verso_piece?.[0]?.path || body.verso_piece || casier.verso_piece,
+      acte_individuel: files?.acte_individuel?.[0]?.path || body.acte_individuel || casier.acte_individuel,
+    } as DeepPartial<Casier>;
 
-    // 📄 GET ALL
-    async getAllCasiers() {
-        const result = await this.db.query(
-            'SELECT * FROM casier ORDER BY id DESC'
-        );
-        return result.rows;
-    }
+    await this.casierRepository.update(id, updateData);
+    return await this.findByCasierId(id);
+  }
 
-    // 📄 GET BY ID
-    async findByCasierId(casier_id: number) {
-
-        const result = await this.db.query(
-            'SELECT * FROM certificat WHERE id = $1',
-            [casier_id],
-        );
-
-        return result.rows[0] || null;
-    }
-
-    // ✏️ UPDATE
-    async updateCasier(
-        certificat_id: number,
-        body: any,
-        files: any,
-    ) {
-
-        const result = await this.db.query(
-            `UPDATE casier SET
-        nom = $1,
-        prenom = $2,
-        telephone = $3,
-        extrait = $4,
-        recto_piece = $5,
-        verso_piece = $6,
-        acte_individuel = $7,
-      WHERE id = $8,
-      RETURNING *`,
-            [
-                body.nom,
-                body.prenom,
-                body.telephone,
-
-                files?.extrait?.[0]?.path || body.extrait || null,
-                files?.recto_piece?.[0]?.path || body.recto_piece || null,
-                files?.verso_piece?.[0]?.path || body.verso_piece || null,
-                files?.acte_individuel?.[0]?.path || body.acte_individuel || null,
-
-                'casier_id',
-            ],
-        );
-
-        return result.rows[0] || null;
-    }
-
-    // ❌ DELETE
-    async deleteCasier(casier_id: number) {
-
-        const result = await this.db.query(
-            'DELETE FROM casier WHERE id = $1',
-            [casier_id],
-        );
-
-        return (result.rowCount ?? 0) > 0;
-    }
+  // ❌ DELETE : Supprime un casier par son ID
+  async deleteCasier(id: string): Promise<boolean> {
+    const result = await this.casierRepository.delete(id);
+    return (result.affected ?? 0) > 0;
+  }
 }

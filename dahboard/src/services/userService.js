@@ -1,44 +1,20 @@
 import axios from "axios";
 
-// 🌐 URL de base de ton API NestJS (à ajuster si ton port ou domaine change)
-const API_URL = "http://localhost:3000/users";
+// Utilisez la variable d'environnement définie sur Render
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://appapro.onrender.com";
 
-/**
- * 📝 Inscrire un nouvel utilisateur / administrateur en Base de Données
- * @param {Object} userData - Contient { prenom, nom, email, password }
- * @returns {Promise<Object>} - La réponse du serveur NestJS
- */
 export const registerUser = async (userData) => {
-  try {
-    // On effectue une requête POST vers http://localhost:3000/users
-    const response = await axios.post(API_URL, userData);
-    return response.data;
-  } catch (error) {
-    // On propage l'erreur pour qu'elle soit attrapée par le catch du Dashboard.jsx
-    throw error;
-  }
+  // Ajustez ici la route réelle attendue par votre backend (ex: /auth/register ou /users)
+  const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
+  return response.data;
 };
 
-/**
- * 👥 Récupérer la liste complète des utilisateurs (Optionnel mais utile)
- */
 export const getAllUsers = async () => {
-  try {
-    const response = await axios.get(API_URL);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await axios.get(`${API_BASE_URL}/users`);
+  return response.data;
 };
 
-/**
- * ❌ Supprimer un utilisateur par son ID (Optionnel)
- */
 export const deleteUser = async (id) => {
-  try {
-    const response = await axios.delete(`${API_URL}/${id}`);
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await axios.delete(`${API_BASE_URL}/users/${id}`);
+  return response.data;
 };

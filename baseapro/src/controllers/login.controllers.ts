@@ -39,7 +39,7 @@ export class LoginController {
     try {
       const googleProfile = req.user;
       const userInDb = await this.usersService.findOrCreateGoogleUser(googleProfile);
-      const session = await this.loginService.validateAndGenerateToken(userInDb);
+      const session = await this.loginService.validateAndGenerateToken(userInDb); 
 
       const redirectUrl = process.env.FRONTEND_URL || 'https://apro-client.onrender.com';
       return res.redirect(`${redirectUrl}/dashboard?token=${session.access_token}`);

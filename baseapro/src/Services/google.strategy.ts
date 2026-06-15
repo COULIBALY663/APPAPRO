@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(private configService: ConfigService) {
     super({
-      // 💡 On ajoute || '' pour garantir à TypeScript qu'une chaîne de caractères sera toujours fournie
+      // 💡 On ajoute || '' pour garantir à TypeScript qu'une chaîne de cacdractères sera toujours fournie
       clientID: configService.get<string>('GOOGLE_CLIENT_ID') || '',
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') || '',
       callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || 'https://appapro.onrender.com/login/google/callback',

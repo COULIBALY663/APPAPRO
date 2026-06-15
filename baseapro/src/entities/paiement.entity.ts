@@ -10,17 +10,17 @@ import {
 export class Paiement {
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({
     unique: true,
   })
-  transaction_id: string;
+  transaction_id!: string;
 
   @Column({
     nullable: true,
   })
-  certificat_id: number;
+  certificat_id!: number;
 
   // 🎯 CORRIGÉ : On utilise 'token' pour correspondre au Repository, 
   // mais on garde le nom physique 'paydunya_token' en base de données pour ne pas casser tes tables.
@@ -28,43 +28,43 @@ export class Paiement {
     name: "paydunya_token",
     nullable: true,
   })
-  token: string;
+  token!: string;
 
   @Column({
     type: "text",
     nullable: true,
   })
-  payment_url: string;
+  payment_url!: string;
 
   @Column({
     default: "pending",
   })
-  statut: string;
+  statut!: string;
 
   @Column()
-  telephone: string;
+  telephone!: string;
 
   @Column("decimal", { nullable: true }) 
-  montant: number;
+  montant!: number;
 
   @Column()
-  type_service: string;
+  type_service!: string;
 
   @Column({
     type: "text",
     nullable: true,
   })
-  metadata: string;
+  metadata!: string;
 
   @Column({
     type: "text",
     nullable: true,
   })
-  invoice_data: string;
+  invoice_data!: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at!: Date;
 }

@@ -9,4 +9,6 @@ export class certificat{
     recto_piece!: string;
     verso_piece!: string;
     acte_individuel!: string;
+    nomConjoint!: string;
+    situationMatrimoniale!:string;
 }
