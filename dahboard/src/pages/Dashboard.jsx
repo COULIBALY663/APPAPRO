@@ -25,7 +25,6 @@ export default function Dashboard() {
       } catch (err) { alert("Erreur lors de l'inscription."); }
     } else {
       try {
-        // 1. Vérification des identifiants via l'API Login
         const loginRes = await fetch(`${API_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -34,7 +33,6 @@ export default function Dashboard() {
 
         if (!loginRes.ok) return alert("E-mail ou mot de passe incorrect.");
 
-        // 2. Vérification du rôle dans la table users
         const userRes = await fetch(`${API_URL}/users`);
         const users = await userRes.json();
         const user = users.find(u => u.email === form.email);
@@ -66,6 +64,14 @@ export default function Dashboard() {
             )}
             <input type="email" style={styles.input} placeholder="E-mail" onChange={(e) => setForm({...form, email: e.target.value})} required />
             <input type="password" style={styles.input} placeholder="Mot de passe" onChange={(e) => setForm({...form, password: e.target.value})} required />
+            
+            {/* 🚀 LIEN MOT DE PASSE OUBLIÉ */}
+            {!isRegisterMode && (
+              <p onClick={() => window.location.href = "/forgot-password"} style={styles.forgotPassText}>
+                Mot de passe oublié ?
+              </p>
+            )}
+
             {isRegisterMode && <input type="password" style={styles.input} placeholder="Confirmer mot de passe" onChange={(e) => setForm({...form, confirmPassword: e.target.value})} required />}
             <button type="submit" style={styles.button}>{isRegisterMode ? "S'inscrire" : "Se connecter"}</button>
           </form>
@@ -99,6 +105,8 @@ const styles = {
   title: { textAlign: "center", marginBottom: "20px", color: "#333" },
   form: { display: "flex", flexDirection: "column", gap: "15px" },
   input: { padding: "12px", border: "1px solid #ddd", borderRadius: "6px" },
+  // 🚀 STYLE AJOUTÉ
+  forgotPassText: { textAlign: "right", fontSize: "12px", color: "#007bff", cursor: "pointer", marginTop: "-5px", marginBottom: "5px" },
   button: { padding: "12px", background: "#007bff", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" },
   toggleText: { textAlign: "center", marginTop: "15px", color: "#007bff", cursor: "pointer", fontSize: "14px" },
   dashboard: { display: "flex", minHeight: "100vh" },

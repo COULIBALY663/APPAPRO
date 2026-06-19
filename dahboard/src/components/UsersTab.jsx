@@ -1,10 +1,13 @@
 import React from "react";
 
 export default function UsersTab({ users, onDeleteUser }) {
+  // Sécurité : si users est undefined/null, on utilise un tableau vide []
+  const safeUsers = Array.isArray(users) ? users : [];
+
   return (
     <div>
       <h2>👥 Gestion des Utilisateurs</h2>
-      <p style={{ fontWeight: "bold", color: "#555" }}>Total: {users?.length || 0}</p>
+      <p style={{ fontWeight: "bold", color: "#555" }}>Total: {safeUsers.length}</p>
       
       <table border="1" width="100%" cellPadding="10" style={{ borderCollapse: "collapse", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
         <thead>
@@ -17,7 +20,7 @@ export default function UsersTab({ users, onDeleteUser }) {
           </tr>
         </thead>
         <tbody>
-          {users.map((u) => {
+          {safeUsers.map((u) => {
             const id = u.users_id || u.id;
             return (
               <tr key={id} style={{ borderBottom: "1px solid #ddd" }}>

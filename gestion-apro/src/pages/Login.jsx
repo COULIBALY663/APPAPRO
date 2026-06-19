@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const navigate = useNavigate();   // 👈 navigation
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     email: "",
     password: ""
@@ -14,15 +14,9 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // 🔐 Simulation authentification
     if (form.email && form.password) {
       console.log("Utilisateur connecté :", form);
-
-      // 🧠 simulation token
       localStorage.setItem("token", "fake-jwt-token");
-
-      // 🚀 redirection vers dashboard
       navigate("/dashboard");
     } else {
       alert("Veuillez remplir tous les champs");
@@ -36,7 +30,6 @@ export default function Login() {
         <p style={styles.subtitle}>Connectez-vous à votre compte</p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
-
           <div style={styles.field}>
             <label style={styles.label}>Email</label>
             <input
@@ -61,6 +54,12 @@ export default function Login() {
               style={styles.input}
               required
             />
+            {/* 🚀 LIEN MOT DE PASSE OUBLIÉ AJOUTÉ */}
+            <div style={styles.forgotPasswordContainer}>
+              <a href="/forgot-password" style={styles.forgotPasswordLink}>
+                Mot de passe oublié ?
+              </a>
+            </div>
           </div>
 
           <button type="submit" style={styles.button}>
@@ -71,6 +70,7 @@ export default function Login() {
     </div>
   );
 }
+
 const styles = {
   container: {
     minHeight: "100vh",
@@ -88,37 +88,15 @@ const styles = {
     maxWidth: "420px",
     boxShadow: "0 15px 40px rgba(0,0,0,0.2)"
   },
-  title: {
-    textAlign: "center",
-    marginBottom: "5px"
-  },
-  subtitle: {
-    textAlign: "center",
-    marginBottom: "25px",
-    color: "#666",
-    fontSize: "14px"
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px"
-  },
-  field: {
-    display: "flex",
-    flexDirection: "column"
-  },
-  label: {
-    marginBottom: "5px",
-    fontSize: "13px",
-    color: "#444"
-  },
-  input: {
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid #ddd",
-    fontSize: "14px",
-    outline: "none"
-  },
+  title: { textAlign: "center", marginBottom: "5px" },
+  subtitle: { textAlign: "center", marginBottom: "25px", color: "#666", fontSize: "14px" },
+  form: { display: "flex", flexDirection: "column", gap: "15px" },
+  field: { display: "flex", flexDirection: "column" },
+  label: { marginBottom: "5px", fontSize: "13px", color: "#444" },
+  input: { padding: "12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "14px", outline: "none" },
+  // 🚀 NOUVEAUX STYLES
+  forgotPasswordContainer: { textAlign: "right", marginTop: "5px" },
+  forgotPasswordLink: { fontSize: "12px", color: "#2563eb", textDecoration: "none", fontWeight: "600" },
   button: {
     marginTop: "10px",
     padding: "12px",
@@ -132,4 +110,3 @@ const styles = {
     transition: "0.2s"
   }
 };
-

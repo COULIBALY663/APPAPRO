@@ -22,6 +22,20 @@ export class LoginController {
     return this.loginService.CreateLogin(data);
   }
 
+  // 1. Route pour demander la réinitialisation
+  @Post('forgot-password')
+  @ApiResponse({ status: 200, description: 'Token de réinitialisation généré' })
+  async forgotPassword(@Body('email') email: string) {
+    return await this.loginService.forgotPassword(email);
+  }
+
+  // 2. Route pour appliquer le nouveau mot de passe
+  @Post('reset-password')
+  @ApiResponse({ status: 200, description: 'Mot de passe réinitialisé avec succès' })
+  async resetPassword(@Body() body: { token: string; newPassword: string }) {
+    return await this.loginService.resetPassword(body.token, body.newPassword);
+  }
+
   @Delete(':login_id')
   @ApiResponse({ status: 200, description: 'Login supprimé' })
   async deleteLogin(@Param('login_id') login_id: string) {
