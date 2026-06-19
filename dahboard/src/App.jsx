@@ -1,6 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import ForgotPassword from "./pages/ForgotPassword"; // Assurez-vous d'avoir ce fichier
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; // Ajoutez Navigate
 
 function App() {
   return (
@@ -8,9 +6,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        {/* Si quelqu'un accède à /index.html, on le renvoie à la racine */}
+        <Route path="/index.html" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;
