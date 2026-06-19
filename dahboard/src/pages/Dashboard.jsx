@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // 1. IMPORT AJOUTÉ
 import Sidebar from "../components/Sidebar";
 import { registerUser } from "../services/userService.js"; 
 import UsersTab from "../components/UsersTab";
@@ -8,6 +9,7 @@ import PaiementsTab from "../components/PaiementsTab";
 const API_URL = import.meta.env.VITE_API_URL || "https://appapro.onrender.com";
 
 export default function Dashboard() {
+  const navigate = useNavigate(); // 2. HOOK INITIALISÉ
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!sessionStorage.getItem("adminToken"));
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", password: "", confirmPassword: "" });
@@ -65,9 +67,9 @@ export default function Dashboard() {
             <input type="email" style={styles.input} placeholder="E-mail" onChange={(e) => setForm({...form, email: e.target.value})} required />
             <input type="password" style={styles.input} placeholder="Mot de passe" onChange={(e) => setForm({...form, password: e.target.value})} required />
             
-            {/* 🚀 LIEN MOT DE PASSE OUBLIÉ */}
+            {/* 3. LIEN MODIFIÉ POUR UTILISER NAVIGATE */}
             {!isRegisterMode && (
-              <p onClick={() => window.location.href = "/forgot-password"} style={styles.forgotPassText}>
+              <p onClick={() => navigate("/forgot-password")} style={styles.forgotPassText}>
                 Mot de passe oublié ?
               </p>
             )}
@@ -105,7 +107,6 @@ const styles = {
   title: { textAlign: "center", marginBottom: "20px", color: "#333" },
   form: { display: "flex", flexDirection: "column", gap: "15px" },
   input: { padding: "12px", border: "1px solid #ddd", borderRadius: "6px" },
-  // 🚀 STYLE AJOUTÉ
   forgotPassText: { textAlign: "right", fontSize: "12px", color: "#007bff", cursor: "pointer", marginTop: "-5px", marginBottom: "5px" },
   button: { padding: "12px", background: "#007bff", color: "white", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold" },
   toggleText: { textAlign: "center", marginTop: "15px", color: "#007bff", cursor: "pointer", fontSize: "14px" },
