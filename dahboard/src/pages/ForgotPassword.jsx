@@ -1,74 +1,66 @@
 import React, { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export default function VerifyOtp() {
-  const [searchParams] = useSearchParams();
-  const email = searchParams.get("email");
-  const [otp, setOtp] = useState("");
-  const [password, setPassword] = useState("");
+export default function ForgotPassword() {
+  const [step, setStep] = useState(1); // 1 = Saisie email, 2 = Saisie OTP/MDP
+  const [formData, setFormData] = useState({ email: "", otp: "", newPassword: "" });
   const navigate = useNavigate();
 
-  const handleVerify = async (e) => {
+  // Étape 1 : Envoi de l'email
+  const handleSendEmail = async (e) => {
     e.preventDefault();
-    try {
-      const res = await fetch("https://appapro.onrender.com/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp, newPassword: password })
-      });
+    const res = await fetch("https://appapro.onrender.com/login/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: formData.email })
+    });
 
-      if (res.ok) {
-        alert("Mot de passe mis à jour avec succès !");
-        navigate("/");
-      } else {
-        alert("Code OTP invalide ou expiré.");
-      }
-    } catch (err) {
-      alert("Erreur de connexion au serveur.");
+    if (res.ok) {
+      setStep(2); // On passe à l'affichage du formulaire OTP
+    } else {
+      alert("Email introuvable.");
     }
   };
 
-  const handleResend = async () => {
-    try {
-      const res = await fetch("https://appapro.onrender.com/login/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-      });
-      if (res.ok) alert("Nouveau code envoyé !");
-      else alert("Erreur lors du renvoi.");
-    } catch (err) {
-      alert("Erreur réseau.");
+  // Étape 2 : Validation OTP et nouveau mot de passe
+  const handleVerifyAndReset = async (e) => {
+    e.preventDefault();
+    const res = await fetch("https://appapro.onrender.com/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        email: formData.email, 
+        otp: formData.otp, 
+        newPassword: formData.newPassword 
+      })
+    });
+
+    if (res.ok) {
+      alert("Mot de passe mis à jour avec succès !");
+      navigate("/");
+    } else {
+      alert("Code OTP invalide ou expiré.");
     }
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2>Vérification OTP</h2>
-        <p style={{ fontSize: "14px", color: "#666" }}>Code envoyé à : <b>{email}</b></p>
-        
-        <form onSubmit={handleVerify}>
-          <input 
-            style={styles.input}
-            placeholder="Code à 6 chiffres" 
-            onChange={(e) => setOtp(e.target.value)} 
-            required 
-          />
-          <input 
-            type="password"
-            style={styles.input}
-            placeholder="Nouveau mot de passe" 
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
-          />
-          <button type="submit" style={styles.button}>Vérifier et Valider</button>
-        </form>
-
-        <div style={{ marginTop: "20px" }}>
-          <p style={{ fontSize: "14px" }}>Vous n'avez pas reçu le code ?</p>
-          <button onClick={handleResend} style={styles.resendBtn}>Renvoyer le code</button>
-        </div>
+        {step === 1 ? (
+          <form onSubmit={handleSendEmail}>
+            <h2>Récupération</h2>
+            <input style={styles.input} placeholder="Entrez votre email" onChange={(e) => setFormData({...formData, email: e.target.value})} required />
+            <button type="submit" style={styles.button}>Envoyer le code</button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyAndReset}>
+            <h2>Vérification OTP</h2>
+            <p>Code envoyé à : <b>{formData.email}</b></p>
+            <input style={styles.input} placeholder="Code à 6 chiffres" onChange={(e) => setFormData({...formData, otp: e.target.value})} required />
+            <input type="password" style={styles.input} placeholder="Nouveau mot de passe" onChange={(e) => setFormData({...formData, newPassword: e.target.value})} required />
+            <button type="submit" style={styles.button}>Vérifier et Valider</button>
+          </form>
+        )}
       </div>
     </div>
   );
@@ -76,8 +68,7 @@ export default function VerifyOtp() {
 
 const styles = {
   container: { display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", backgroundColor: "#f4f7f6" },
-  card: { backgroundColor: "#ffffff", padding: "40px", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)", textAlign: "center", width: "100%", maxWidth: "400px" },
+  card: { backgroundColor: "#ffffff", padding: "40px", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.1)", textAlign: "center", width: "400px" },
   input: { width: "100%", padding: "12px", margin: "10px 0", borderRadius: "8px", border: "1px solid #ddd", boxSizing: "border-box" },
-  button: { width: "100%", padding: "12px", backgroundColor: "#007bff", color: "#fff", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer", marginTop: "10px" },
-  resendBtn: { background: "none", border: "none", color: "#007bff", cursor: "pointer", textDecoration: "underline", fontSize: "14px" }
+  button: { width: "100%", padding: "12px", backgroundColor: "#007bff", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }
 };
