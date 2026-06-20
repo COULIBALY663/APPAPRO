@@ -1,8 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('users') // Nom de la table dans PostgreSQL
+@Entity('users')
 export class Users {
-  @PrimaryGeneratedColumn() // ID auto-incrémenté
+  @PrimaryGeneratedColumn()
   users_id!: number;
 
   @Column()
@@ -11,12 +11,19 @@ export class Users {
   @Column()
   prenom!: string;
 
-  @Column({ default: 'USER' }) // Rôle par défaut (notez le singulier 'USER')
+  @Column({ default: 'USER' })
   role!: string;
 
-  @Column({ unique: true }) // Email unique pour éviter les doublons
+  @Column({ unique: true })
   email!: string;
 
   @Column()
   password!: string;
+
+  // 🚀 CES LIGNES CORRIGENT LES ERREURS TS2339
+  @Column({ nullable: true })
+  resetPasswordToken?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  resetPasswordExpires?: Date;
 }

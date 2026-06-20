@@ -6,7 +6,6 @@ import { JwtModule } from '@nestjs/jwt';
 
 // === ENTITÉS ===
 import { Users } from './entities/users.entity';
-import { Login } from './entities/login.entity';
 import { Casier } from './entities/casier.entity';
 import { Certificat } from './entities/certificat.entity';
 import { Paiement } from './entities/paiement.entity';
@@ -45,12 +44,11 @@ import { PaiementService } from './Services/paiement.service';
       secret: process.env.JWT_SECRET || 'CLE_SECRET_PROVISOIRE_ACADEMIE_PRO_2026',
       signOptions: { expiresIn: '1d' }, 
     }),
-    TypeOrmModule.forFeature([Paiement, Users, Certificat, Login, Casier]),
+    TypeOrmModule.forFeature([Paiement, Users, Certificat, Casier]),
   ],
 
   controllers: [
     UsersController,
-    LoginController,
     CasierController,
     CertificatController, 
     PaiementController,    
@@ -59,7 +57,6 @@ import { PaiementService } from './Services/paiement.service';
   providers: [
     // Déclaration des classes pour résoudre UnknownDependenciesException
     UsersServices,
-    LoginService,
     CasierService,
     CertificatService,
     PaiementService,
@@ -68,7 +65,6 @@ import { PaiementService } from './Services/paiement.service';
 
     // Déclaration des interfaces (alias)
     { provide: IUsersRepository, useClass: UsersServices },
-    { provide: ILoginRepository, useClass: LoginService },
     { provide: CASIER_REPOSITORY, useClass: CasierService },
     { provide: CERTIFICAT_REPOSITORY, useClass: CertificatService },
   ],

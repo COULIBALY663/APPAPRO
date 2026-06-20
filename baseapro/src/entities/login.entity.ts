@@ -1,9 +1,18 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('login') // Définit le nom de la table dans PostgreSQL
-export class Login {
+@Entity('users') // Cible bien la table 'users' de votre base de données
+export class Users {
   @PrimaryGeneratedColumn()
-  id_login!: number;
+  users_id!: number;
+
+  @Column()
+  nom!: string;
+
+  @Column()
+  prenom!: string;
+
+  @Column({ default: 'USER' })
+  role!: string;
 
   @Column({ unique: true })
   email!: string;
@@ -11,7 +20,7 @@ export class Login {
   @Column()
   password!: string;
 
-  // 🚀 CES COLONNES SONT INDISPENSABLES POUR LE RESET MOT DE PASSE
+  // 🚀 LES COLONNES INDISPENSABLES INTÉGRÉES DANS LA TABLE USERS
   @Column({ nullable: true })
   resetPasswordToken?: string;
 
