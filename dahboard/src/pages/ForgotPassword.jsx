@@ -1,53 +1,70 @@
 import React, { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
-export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
+export default function VerifyOtp() {
+  const [searchParams] = useSearchParams();
+  const email = searchParams.get("email");
+  const [otp, setOtp] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleVerify = async (e) => {
     e.preventDefault();
-    
-    try {
-      // Appel vers votre API NestJS configurée
-      const res = await fetch("https://appapro.onrender.com/login/forgot-password", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json" 
-        },
-        body: JSON.stringify({ email })
-      });
+    const res = await fetch("https://appapro.onrender.com/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp, newPassword: password })
+    });
 
-      if (res.ok) {
-        alert("Les instructions de réinitialisation ont été envoyées à votre email.");
-      } else {
-        alert("Erreur : Impossible d'envoyer les instructions. Vérifiez l'adresse email.");
-      }
-    } catch (error) {
-      console.error("Erreur lors de la requête :", error);
-      alert("Une erreur est survenue lors de la connexion au serveur.");
+    if (res.ok) {
+      alert("Mot de passe mis à jour avec succès !");
+      navigate("/");
+    } else {
+      alert("Code OTP invalide ou expiré.");
     }
+  };
+
+  const handleResend = async () => {
+    // On rappelle la même route que ForgotPassword pour relancer l'envoi
+    const res = await fetch("https://appapro.onrender.com/login/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email })
+    });
+    if (res.ok) alert("Nouveau code envoyé !");
+    else alert("Erreur lors du renvoi.");
   };
 
   return (
     <div style={{ padding: "50px", textAlign: "center", maxWidth: "400px", margin: "0 auto" }}>
-      <h2>Récupération de mot de passe</h2>
-      <p>Entrez votre adresse email pour recevoir un lien de réinitialisation.</p>
+      <h2>Vérification OTP</h2>
+      <p>Entrez le code reçu par email pour : <b>{email}</b></p>
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleVerify}>
         <input 
-          type="email" 
-          placeholder="Entrez votre email" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)} 
+          style={{ width: "100%", padding: "10px", marginBottom: "10px" }}
+          placeholder="Code OTP" 
+          onChange={(e) => setOtp(e.target.value)} 
           required 
-          style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
         />
-        <button 
-          type="submit" 
-          style={{ width: "100%", padding: "10px", backgroundColor: "#007bff", color: "white", border: "none", cursor: "pointer" }}
-        >
-          Envoyer le lien
+        <input 
+          type="password"
+          style={{ width: "100%", padding: "10px", marginBottom: "15px" }}
+          placeholder="Nouveau mot de passe" 
+          onChange={(e) => setPassword(e.target.value)} 
+          required 
+        />
+        <button type="submit" style={{ width: "100%", padding: "10px", backgroundColor: "#007bff", color: "white", border: "none", cursor: "pointer" }}>
+          Valider
         </button>
       </form>
+
+      <div style={{ marginTop: "20px" }}>
+        <p>Vous n'avez pas reçu le code ?</p>
+        <button onClick={handleResend} style={{ background: "none", border: "none", color: "#007bff", cursor: "pointer", textDecoration: "underline" }}>
+          Renvoyer le code
+        </button>
+      </div>
     </div>
   );
 }
