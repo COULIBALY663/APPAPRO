@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function ForgotPassword() {
-  const [step, setStep] = useState(1); // 1 = Saisie email, 2 = Saisie OTP/MDP
-  const [formData, setFormData] = useState({ email: "", otp: "", newPassword: "" });
+  const [step, setStep] = useState(1); 
+  const [formData, setFormData] = useState({ email: "", otp: "", password: "", confirmPassword: "" });
   const navigate = useNavigate();
 
   // Étape 1 : Envoi de l'email
@@ -14,24 +14,26 @@ export default function ForgotPassword() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: formData.email })
     });
-
-    if (res.ok) {
-      setStep(2); // On passe à l'affichage du formulaire OTP
-    } else {
-      alert("Email introuvable.");
-    }
+    if (res.ok) setStep(2);
+    else alert("Email introuvable.");
   };
 
-  // Étape 2 : Validation OTP et nouveau mot de passe
+  // Étape 2 : Validation OTP + Double saisie mot de passe
   const handleVerifyAndReset = async (e) => {
     e.preventDefault();
+    
+    // Vérification côté Frontend : les mots de passe correspondent-ils ?
+    if (formData.password !== formData.confirmPassword) {
+      return alert("Les deux mots de passe ne correspondent pas !");
+    }
+
     const res = await fetch("https://appapro.onrender.com/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         email: formData.email, 
         otp: formData.otp, 
-        newPassword: formData.newPassword 
+        newPassword: formData.password 
       })
     });
 
@@ -55,9 +57,10 @@ export default function ForgotPassword() {
         ) : (
           <form onSubmit={handleVerifyAndReset}>
             <h2>Vérification OTP</h2>
-            <p>Code envoyé à : <b>{formData.email}</b></p>
+            <p style={{fontSize: "12px"}}>Code envoyé à : <b>{formData.email}</b></p>
             <input style={styles.input} placeholder="Code à 6 chiffres" onChange={(e) => setFormData({...formData, otp: e.target.value})} required />
-            <input type="password" style={styles.input} placeholder="Nouveau mot de passe" onChange={(e) => setFormData({...formData, newPassword: e.target.value})} required />
+            <input type="password" style={styles.input} placeholder="Nouveau mot de passe" onChange={(e) => setFormData({...formData, password: e.target.value})} required />
+            <input type="password" style={styles.input} placeholder="Confirmer mot de passe" onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} required />
             <button type="submit" style={styles.button}>Vérifier et Valider</button>
           </form>
         )}
