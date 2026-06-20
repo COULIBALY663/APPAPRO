@@ -18,21 +18,16 @@ export class LoginService {
     // 1. Inscription sécurisée
     async CreateLogin(loginDto: CreateLoginDto): Promise<Login> {
         const existing = await this.loginRepository.findOne({ where: { email: loginDto.email } });
-        if (existing) {
-            throw new ConflictException('Cet email est déjà utilisé.');
-        }
+        if (existing) throw new ConflictException('Cet email est déjà utilisé.');
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(loginDto.password, salt);
         
-        const newLogin = this.loginRepository.create({
-            ...loginDto,
-            password: hashedPassword
-        });
+        const newLogin = this.loginRepository.create({ ...loginDto, password: hashedPassword });
         return await this.loginRepository.save(newLogin);
     }
 
-    // 2. Connexion et validation sécurisée
+    // 2. Validation et génération de jeton (Rectification de l'erreur TS2339)
     async validateAndGenerateToken(user: { users_id: number; email: string; prenom: string; role: string }) {
         const payload = { 
             userId: user.users_id, 
@@ -42,7 +37,6 @@ export class LoginService {
         };
 
         const existingLogin = await this.loginRepository.findOne({ where: { email: user.email } });
-
         if (!existingLogin) {
             await this.loginRepository.save({ 
                 email: user.email, 
@@ -56,32 +50,32 @@ export class LoginService {
         };
     }
 
-    // 3. Mot de passe oublié
-    async forgotPassword(email: string) {
+    // 3. Demande d'OTP
+    async requestOtp(email: string) {
         const user = await this.loginRepository.findOne({ where: { email } });
         if (!user) throw new NotFoundException('Utilisateur introuvable');
 
-        const token = Math.random().toString(36).substring(2, 15);
-        user.resetPasswordToken = token;
-        user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 heure
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        user.resetPasswordToken = otp;
+        user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
         
         await this.loginRepository.save(user);
-        return { message: "Token généré", token };
+        return { message: "Code OTP généré", otp };
     }
 
-    // 4. Réinitialisation effective
-    async resetPassword(token: string, newPassword: string) {
-        const user = await this.loginRepository.findOne({ where: { resetPasswordToken: token } });
+    // 4. Validation OTP (Rectification de l'erreur TS2322 avec undefined)
+    async verifyOtpAndReset(email: string, otp: string, newPassword: string) {
+        const user = await this.loginRepository.findOne({ where: { email, resetPasswordToken: otp } });
         
-        // Vérification de sécurité avec les types corrects
         if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
-            throw new UnauthorizedException('Token invalide ou expiré');
+            throw new UnauthorizedException('Code OTP invalide ou expiré');
         }
 
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
         
-        // Nettoyage des champs avec undefined
+        // Nettoyage avec undefined (au lieu de null pour respecter le typage)
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
         

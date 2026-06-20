@@ -22,18 +22,18 @@ export class LoginController {
     return this.loginService.CreateLogin(data);
   }
 
-  // 1. Route pour demander la réinitialisation
-  @Post('forgot-password')
-  @ApiResponse({ status: 200, description: 'Token de réinitialisation généré' })
-  async forgotPassword(@Body('email') email: string) {
-    return await this.loginService.forgotPassword(email);
+  // 1. Route pour demander l'envoi de l'OTP
+  @Post('request-otp')
+  @ApiResponse({ status: 200, description: 'Code OTP envoyé' })
+  async requestOtp(@Body('email') email: string) {
+    return await this.loginService.requestOtp(email);
   }
 
-  // 2. Route pour appliquer le nouveau mot de passe
-  @Post('reset-password')
+  // 2. Route pour valider l'OTP et définir le nouveau mot de passe
+  @Post('verify-otp')
   @ApiResponse({ status: 200, description: 'Mot de passe réinitialisé avec succès' })
-  async resetPassword(@Body() body: { token: string; newPassword: string }) {
-    return await this.loginService.resetPassword(body.token, body.newPassword);
+  async verifyOtp(@Body() body: { email: string; otp: string; newPassword: string }) {
+    return await this.loginService.verifyOtpAndReset(body.email, body.otp, body.newPassword);
   }
 
   @Delete(':login_id')
