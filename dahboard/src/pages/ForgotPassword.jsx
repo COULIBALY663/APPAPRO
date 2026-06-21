@@ -21,7 +21,7 @@ export default function ForgotPassword() {
     }
   };
 
-  // 2. Vérification OTP et mise à jour mot de passe (Fusionnées)
+  // 2. Vérification OTP et mise à jour mot de passe
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) return alert("Les mots de passe ne correspondent pas !");
@@ -38,7 +38,7 @@ export default function ForgotPassword() {
 
     if (res.ok) {
         alert("Mot de passe mis à jour avec succès !");
-        navigate("/"); // Redirection vers la page de connexion
+        navigate("/"); 
     } else {
         alert("Code OTP invalide ou expiré.");
     }
@@ -47,6 +47,8 @@ export default function ForgotPassword() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
+        
+        {/* ÉTAPE 1 : Saisie de l'email */}
         {step === 1 && (
           <form onSubmit={handleSendEmail}>
             <h2>Récupération</h2>
@@ -55,16 +57,20 @@ export default function ForgotPassword() {
           </form>
         )}
 
+        {/* ÉTAPE 2 : Saisie de l'OTP et du nouveau mot de passe */}
         {step === 2 && (
           <form onSubmit={handleUpdatePassword}>
             <h2>Finaliser</h2>
             <p style={{fontSize: "14px", color: "#666"}}>Code envoyé à : <b>{formData.email}</b></p>
+            
             <input style={styles.input} placeholder="Code à 6 chiffres" onChange={(e) => setFormData({...formData, otp: e.target.value})} required />
             <input type="password" style={styles.input} placeholder="Nouveau mot de passe" onChange={(e) => setFormData({...formData, password: e.target.value})} required />
             <input type="password" style={styles.input} placeholder="Confirmer mot de passe" onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})} required />
+            
             <button type="submit" style={styles.button}>Valider et changer</button>
           </form>
         )}
+
       </div>
     </div>
   );
