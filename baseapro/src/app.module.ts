@@ -15,8 +15,8 @@ import { UsersServices } from './Services/users.services';
 import { UsersController } from './controllers/users.controllers';
 import { IUsersRepository } from './repository/users.repository';
 
+// Réintégration indispensable pour les routes
 import { LoginService } from './Services/Login.service';
-import { ILoginRepository } from './repository/login.repository';
 import { LoginController } from './controllers/login.controllers';
 import { GoogleStrategy } from './Services/google.strategy';
 
@@ -51,11 +51,12 @@ import { PaiementService } from './Services/paiement.service';
     UsersController,
     CasierController,
     CertificatController, 
-    PaiementController,    
+    PaiementController, 
+    LoginController, // ✅ Réintégré : permet à NestJS de voir vos routes /login/...
   ],
 
   providers: [
-    // Déclaration des classes pour résoudre UnknownDependenciesException
+    LoginService,    // ✅ Réintégré : permet au contrôleur d'utiliser les méthodes
     UsersServices,
     CasierService,
     CertificatService,
