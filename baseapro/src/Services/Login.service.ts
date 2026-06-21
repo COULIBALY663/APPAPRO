@@ -17,10 +17,8 @@ export class LoginService {
     async CreateLogin(loginDto: CreateLoginDto): Promise<Users> {
         const existing = await this.userRepository.findOne({ where: { email: loginDto.email } });
         if (existing) throw new ConflictException('Cet email est déjà utilisé.');
-
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(loginDto.password, salt);
-        
         const newUser = this.userRepository.create({ ...loginDto, password: hashedPassword });
         return await this.userRepository.save(newUser);
     }
@@ -28,11 +26,9 @@ export class LoginService {
     async requestOtp(email: string) {
         const user = await this.userRepository.findOne({ where: { email } });
         if (!user) throw new NotFoundException('Utilisateur introuvable');
-
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        
         user.resetPasswordToken = otp;
-        user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
+        user.resetPasswordExpires = new Date(Date.now() + 10 * 60000);
         await this.userRepository.save(user);
 
         const transporter = nodemailer.createTransport({
@@ -49,31 +45,23 @@ export class LoginService {
             subject: 'Code de réinitialisation',
             text: `Votre code OTP est : ${otp}. Il expire dans 10 minutes.`
         });
-
-        return { message: "Code OTP envoyé avec succès" }; 
+        return { message: "Code envoyé" };
     }
 
     async verifyOtpAndReset(email: string, otp: string, newPassword: string) {
         const user = await this.userRepository.findOne({ where: { email, resetPasswordToken: otp } });
-        
         if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
-            throw new UnauthorizedException('Code OTP invalide ou expiré');
+            throw new UnauthorizedException('Code invalide ou expiré');
         }
-
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
-        
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
-        
         await this.userRepository.save(user);
-        return { message: "Mot de passe mis à jour avec succès" };
+        return { message: "Mot de passe mis à jour" };
     }
 
     async DeleteLogin(users_id: number): Promise<void> {
-        const result = await this.userRepository.delete(users_id);
-        if (result.affected === 0) {
-            throw new NotFoundException('Utilisateur introuvable');
-        }
+        await this.userRepository.delete(users_id);
     }
 }
