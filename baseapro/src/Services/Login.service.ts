@@ -5,7 +5,7 @@ import { Users } from '../entities/users.entity';
 import { CreateLoginDto } from '../Dtos/login.dtos';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import * as nodemailer from 'nodemailer'; // <--- Import ajouté
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class LoginService {
@@ -14,7 +14,16 @@ export class LoginService {
         private readonly jwtService: JwtService,
     ) {}
 
-    // ... (Gardez vos méthodes CreateLogin, validateAndGenerateToken, verifyOtpAndReset, DeleteLogin)
+    async CreateLogin(loginDto: CreateLoginDto): Promise<Users> {
+        const existing = await this.userRepository.findOne({ where: { email: loginDto.email } });
+        if (existing) throw new ConflictException('Cet email est déjà utilisé.');
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(loginDto.password, salt);
+        
+        const newUser = this.userRepository.create({ ...loginDto, password: hashedPassword });
+        return await this.userRepository.save(newUser);
+    }
 
     async requestOtp(email: string) {
         const user = await this.userRepository.findOne({ where: { email } });
@@ -26,16 +35,14 @@ export class LoginService {
         user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
         await this.userRepository.save(user);
 
-        // CONFIGURATION DU MAILER
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: process.env.EMAIL_USER, // Configurez ceci sur Render
-                pass: process.env.EMAIL_PASS  // "Mot de passe d'application"
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             }
         });
 
-        // ENVOI DE L'EMAIL
         await transporter.sendMail({
             from: '"Support Académie Pro" <votre-email@gmail.com>',
             to: email,
@@ -45,6 +52,28 @@ export class LoginService {
 
         return { message: "Code OTP envoyé avec succès" }; 
     }
-    
-    // ... reste de votre classe
+
+    async verifyOtpAndReset(email: string, otp: string, newPassword: string) {
+        const user = await this.userRepository.findOne({ where: { email, resetPasswordToken: otp } });
+        
+        if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+            throw new UnauthorizedException('Code OTP invalide ou expiré');
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        
+        await this.userRepository.save(user);
+        return { message: "Mot de passe mis à jour avec succès" };
+    }
+
+    async DeleteLogin(users_id: number): Promise<void> {
+        const result = await this.userRepository.delete(users_id);
+        if (result.affected === 0) {
+            throw new NotFoundException('Utilisateur introuvable');
+        }
+    }
 }
