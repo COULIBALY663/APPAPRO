@@ -35,11 +35,9 @@ export class LoginController {
     return await this.loginService.verifyOtpAndReset(body.email, body.otp, body.newPassword);
   }
 
-  @Delete(':login_id')
+ @Delete(':users_id') // Modification ici pour refléter l'ID de la table 'users'
   @ApiResponse({ status: 200, description: 'Utilisateur supprimé' })
-  async deleteLogin(@Param('login_id') login_id: string) {
-    return this.loginService.DeleteLogin(parseInt(login_id, 10));
+  async deleteLogin(@Param('users_id') users_id: string) {
+    return this.loginService.DeleteLogin(parseInt(users_id, 10));
   }
-
-  // ... (votre logique GoogleAuth reste identique)
 }
