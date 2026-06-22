@@ -23,40 +23,43 @@ export class LoginService {
         return await this.userRepository.save(newUser);
     }
 
-    async requestOtp(email: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) throw new NotFoundException('Utilisateur introuvable');
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    
-    user.resetPasswordToken = otp;
-    user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
-    await this.userRepository.save(user);
-
-    try {
-        // Tentative d'envoi d'e-mail
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-
-        await transporter.sendMail({
-            from: '"Support Académie Pro" <votre-email@gmail.com>',
-            to: email,
-            subject: 'Code de réinitialisation',
-            text: `Votre code OTP est : ${otp}. Il est valide pour 10 minutes.`
-        });
-        
-        return { message: "Code OTP généré et envoyé par email", otp };
-    } catch (error) {
-        // En cas d'échec mail, on retourne quand même le code (pour vos tests)
-        console.error("Erreur envoi mail :", error);
-        return { message: "Code OTP généré (email non envoyé)", otp }; 
+    async Login(email: string, pass: string) {
+        const user = await this.userRepository.findOne({ where: { email } });
+        if (!user) throw new NotFoundException('Utilisateur introuvable');
+        const isMatch = await bcrypt.compare(pass, user.password);
+        if (!isMatch) throw new UnauthorizedException('Mot de passe incorrect');
+        return this.validateAndGenerateToken(user);
     }
-  }
+
+    async requestOtp(email: string) {
+        const user = await this.userRepository.findOne({ where: { email } });
+        if (!user) throw new NotFoundException('Utilisateur introuvable');
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.resetPasswordToken = otp;
+        user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
+        await this.userRepository.save(user);
+
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+            await transporter.sendMail({
+                from: '"Support Académie Pro" <votre-email@gmail.com>',
+                to: email,
+                subject: 'Code de réinitialisation',
+                text: `Votre code OTP est : ${otp}. Il est valide pour 10 minutes.`
+            });
+            return { message: "Code OTP généré et envoyé par email", otp };
+        } catch (error) {
+            console.error("Erreur envoi mail :", error);
+            return { message: "Code OTP généré (email non envoyé)", otp }; 
+        }
+    }
+
     async verifyOtpAndReset(email: string, otp: string, newPassword: string) {
         const user = await this.userRepository.findOne({ where: { email, resetPasswordToken: otp } });
         if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
@@ -72,5 +75,12 @@ export class LoginService {
 
     async DeleteLogin(users_id: number): Promise<void> {
         await this.userRepository.delete(users_id);
+    }
+
+    async validateAndGenerateToken(user: Users) {
+        const payload = { email: user.email, sub: user.users_id, role: user.role };
+        return {
+            access_token: this.jwtService.sign(payload),
+        };
     }
 }

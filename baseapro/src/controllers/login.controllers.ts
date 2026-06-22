@@ -40,4 +40,9 @@ export class LoginController {
   async deleteLogin(@Param('users_id') users_id: string) {
     return this.loginService.DeleteLogin(parseInt(users_id, 10));
   }
+  @Post('connexion')
+  @ApiResponse({ status: 200, description: 'Connexion réussie' })
+  async login(@Body() loginDto: CreateLoginDto) {
+    return this.loginService.Login(loginDto.email, loginDto.password);
+  }
 }
