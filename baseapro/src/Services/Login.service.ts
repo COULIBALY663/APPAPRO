@@ -6,6 +6,10 @@ import { CreateLoginDto } from '../Dtos/login.dtos';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
+import * as dns from 'dns';
+
+// Forcez la résolution DNS en IPv4 pour éviter les blocages réseau sur Render
+dns.setDefaultResultOrder('ipv4first');
 
 @Injectable()
 export class LoginService {
@@ -34,24 +38,30 @@ export class LoginService {
     async requestOtp(email: string) {
         const user = await this.userRepository.findOne({ where: { email } });
         if (!user) throw new NotFoundException('Utilisateur introuvable');
+        
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.resetPasswordToken = otp;
         user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
         await this.userRepository.save(user);
 
         try {
+            // Configuration SMTP directe avec forçage IPv4
             const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                host: 'smtp.gmail.com', // Forcez l'hôte
-                port: 465,              // Port sécurisé
+                host: 'smtp.gmail.com',
+                port: 465,
                 secure: true,
                 auth: {
                     user: process.env.EMAIL_USER,
                     pass: process.env.EMAIL_PASS
-                }
-            });
+                },
+                tls: {
+                    rejectUnauthorized: false
+                },
+                family: 4 // Force l'utilisation d'IPv4
+            } as nodemailer.TransportOptions);
+
             await transporter.sendMail({
-                from: '"Support Académie Pro" <votre-email@gmail.com>',
+                from: `"Support Académie Pro" <${process.env.EMAIL_USER}>`,
                 to: email,
                 subject: 'Code de réinitialisation',
                 text: `Votre code OTP est : ${otp}. Il est valide pour 10 minutes.`
@@ -59,7 +69,7 @@ export class LoginService {
             return { message: "Code OTP généré et envoyé par email", otp };
         } catch (error) {
             console.error("Erreur envoi mail :", error);
-            return { message: "Code OTP généré (email non envoyé)", otp }; 
+            return { message: "Erreur lors de l'envoi de l'email", error: error.message }; 
         }
     }
 
