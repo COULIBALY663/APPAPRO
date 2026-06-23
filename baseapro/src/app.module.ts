@@ -35,7 +35,6 @@ import { PaiementService } from './Services/paiement.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env.production',
       isGlobal: true
     }),
     DatabaseModule,
