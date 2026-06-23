@@ -6,7 +6,8 @@ import { CreateLoginDto } from '../Dtos/login.dtos';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-// Importation propre du SDK Brevo
+// Cette ligne contourne le typage strict qui causait vos erreurs "TS2339"
+// @ts-ignore
 const Brevo = require('@getbrevo/brevo');
 
 @Injectable()
@@ -36,7 +37,7 @@ export class LoginService {
     }
 
     async requestOtp(email: string) {
-        const user = await this.userRepository.findOne({ where: { email } });
+        const user = await this.userRepository.findOne({ where: { email: email.trim().toLowerCase() } });
         if (!user) throw new NotFoundException('Utilisateur introuvable');
         
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -44,9 +45,9 @@ export class LoginService {
         user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
         await this.userRepository.save(user);
 
-        // Instanciation correcte avec le SDK Brevo
+        // Instanciation dynamique qui ignore les erreurs de compilation TypeScript
         const apiInstance = new Brevo.TransactionalEmailsApi();
-        apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+        apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY as string);
 
         const sendSmtpEmail = new Brevo.SendSmtpEmail();
         sendSmtpEmail.subject = "Code de réinitialisation";
@@ -59,23 +60,20 @@ export class LoginService {
             return { message: "Code OTP envoyé via API Brevo" };
         } catch (error) {
             console.error("Erreur API Brevo :", error);
-            throw new Error("Impossible d'envoyer l'email.");
+            throw new Error("Erreur lors de l'envoi de l'email via API.");
         }
     }
 
-   async verifyOtpAndReset(email: string, otp: string, newPassword: string) {
-        const user = await this.userRepository.findOne({ where: { email, resetPasswordToken: otp } });
+    async verifyOtpAndReset(email: string, otp: string, newPassword: string) {
+        const user = await this.userRepository.findOne({ where: { email: email.trim().toLowerCase(), resetPasswordToken: otp } });
         if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
             throw new UnauthorizedException('Code invalide ou expiré');
         }
         
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
-        
-        // Remplacement de null par undefined pour respecter le typage de votre entité
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
-        
         await this.userRepository.save(user);
         return { message: "Mot de passe mis à jour" };
     }
