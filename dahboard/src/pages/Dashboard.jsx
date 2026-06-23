@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // 1. IMPORT AJOUTÉ
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { registerUser } from "../services/userService.js"; 
 import UsersTab from "../components/UsersTab";
@@ -9,7 +9,7 @@ import PaiementsTab from "../components/PaiementsTab";
 const API_URL = import.meta.env.VITE_API_URL || "https://appapro.onrender.com";
 
 export default function Dashboard() {
-  const navigate = useNavigate(); // 2. HOOK INITIALISÉ
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!sessionStorage.getItem("adminToken"));
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [form, setForm] = useState({ nom: "", prenom: "", email: "", password: "", confirmPassword: "" });
@@ -19,31 +19,38 @@ export default function Dashboard() {
     e.preventDefault();
 
     if (isRegisterMode) {
+      // --- LOGIQUE D'INSCRIPTION ---
       if (form.password !== form.confirmPassword) return alert("Les mots de passe ne correspondent pas !");
       try {
         await registerUser({ prenom: form.prenom, nom: form.nom, email: form.email, password: form.password });
         alert("Inscription avec succès ! Veuillez contacter le 0564225178 pour valider votre compte.");
         setIsRegisterMode(false);
-      } catch (err) { alert("Erreur lors de l'inscription."); }
+      } catch (err) { 
+        alert("Erreur lors de l'inscription."); 
+      }
     } else {
+      // --- LOGIQUE DE CONNEXION (CORRIGÉE) ---
       try {
-        const loginRes = await fetch(`${API_URL}/login`, {
+        const loginRes = await fetch(`${API_URL}/login/connexion`, { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: form.email, password: form.password })
         });
 
-        if (!loginRes.ok) return alert("E-mail ou mot de passe incorrect.");
+        if (!loginRes.ok) {
+          const errorData = await loginRes.json();
+          return alert(errorData.message || "E-mail ou mot de passe incorrect.");
+        }
 
-        const userRes = await fetch(`${API_URL}/users`);
-        const users = await userRes.json();
-        const user = users.find(u => u.email === form.email);
-
-        if (user && (String(user.role).toLowerCase().trim() === 'admin' || String(user.role).toLowerCase().trim() === 'superadmin')) {
-          sessionStorage.setItem("adminToken", "TRUE");
-          setIsAuthenticated(true);
+        const data = await loginRes.json();
+        
+        if (data.access_token) {
+           sessionStorage.setItem("adminToken", data.access_token);
+           setIsAuthenticated(true);
+           alert("Connexion réussie !");
+           navigate("/"); 
         } else {
-          alert("Accès refusé : compte non autorisé. Contactez le 0564225178.");
+           alert("Connexion échouée : aucun jeton reçu.");
         }
       } catch (err) { 
         console.error(err);
@@ -67,7 +74,6 @@ export default function Dashboard() {
             <input type="email" style={styles.input} placeholder="E-mail" onChange={(e) => setForm({...form, email: e.target.value})} required />
             <input type="password" style={styles.input} placeholder="Mot de passe" onChange={(e) => setForm({...form, password: e.target.value})} required />
             
-            {/* 3. LIEN MODIFIÉ POUR UTILISER NAVIGATE */}
             {!isRegisterMode && (
               <p onClick={() => navigate("/forgot-password")} style={styles.forgotPassText}>
                 Mot de passe oublié ?
