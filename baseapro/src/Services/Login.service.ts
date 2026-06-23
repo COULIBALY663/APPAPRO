@@ -5,11 +5,10 @@ import { Users } from '../entities/users.entity';
 import { CreateLoginDto } from '../Dtos/login.dtos';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import * as nodemailer from 'nodemailer';
-import * as dns from 'dns';
 
-// Forcez la résolution DNS en IPv4 pour éviter les blocages réseau sur Render
-dns.setDefaultResultOrder('ipv4first');
+// Utilisation de require pour contourner les erreurs de typage TypeScript sur le SDK Brevo
+// @ts-ignore
+const Brevo = require('@getbrevo/brevo');
 
 @Injectable()
 export class LoginService {
@@ -44,26 +43,22 @@ export class LoginService {
         user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
         await this.userRepository.save(user);
 
+        // Initialisation via l'API HTTP (port 443, jamais bloqué par Render)
+        const apiInstance = new Brevo.TransactionalEmailsApi();
+        apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY as string);
+
+        const sendSmtpEmail = new Brevo.SendSmtpEmail();
+        sendSmtpEmail.subject = "Code de réinitialisation";
+        sendSmtpEmail.sender = { "name": "Support Académie Pro", "email": "contact@academiepro.com" }; // Remplacez par votre email d'expéditeur validé sur Brevo
+        sendSmtpEmail.to = [{ "email": email }];
+        sendSmtpEmail.textContent = `Votre code OTP est : ${otp}. Il est valide pour 10 minutes.`;
+
         try {
-            // Configuration SMTP directe avec forçage IPv4
-            const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT),
-    secure: false, // Important pour le port 587
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }});
-            await transporter.sendMail({
-                from: `"Support Académie Pro" <${process.env.EMAIL_USER}>`,
-                to: email,
-                subject: 'Code de réinitialisation',
-                text: `Votre code OTP est : ${otp}. Il est valide pour 10 minutes.`
-            });
-            return { message: "Code OTP généré et envoyé par email", otp };
+            await apiInstance.sendTransacEmail(sendSmtpEmail);
+            return { message: "Code OTP envoyé via API Brevo", otp };
         } catch (error) {
-            console.error("Erreur envoi mail :", error);
-            return { message: "Erreur lors de l'envoi de l'email", error: error.message }; 
+            console.error("Erreur API Brevo :", error);
+            return { message: "Erreur lors de l'envoi", error: (error as any).message }; 
         }
     }
 
