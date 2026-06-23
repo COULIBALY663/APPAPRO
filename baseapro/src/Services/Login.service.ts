@@ -6,8 +6,7 @@ import { CreateLoginDto } from '../Dtos/login.dtos';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-// Utilisation de require pour contourner les erreurs de typage TypeScript sur le SDK Brevo
-// @ts-ignore
+// Importation propre du SDK Brevo
 const Brevo = require('@getbrevo/brevo');
 
 @Injectable()
@@ -20,6 +19,7 @@ export class LoginService {
     async CreateLogin(loginDto: CreateLoginDto): Promise<Users> {
         const existing = await this.userRepository.findOne({ where: { email: loginDto.email } });
         if (existing) throw new ConflictException('Cet email est déjà utilisé.');
+        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(loginDto.password, salt);
         const newUser = this.userRepository.create({ ...loginDto, password: hashedPassword });
@@ -29,6 +29,7 @@ export class LoginService {
     async Login(email: string, pass: string) {
         const user = await this.userRepository.findOne({ where: { email } });
         if (!user) throw new NotFoundException('Utilisateur introuvable');
+        
         const isMatch = await bcrypt.compare(pass, user.password);
         if (!isMatch) throw new UnauthorizedException('Mot de passe incorrect');
         return this.validateAndGenerateToken(user);
@@ -43,22 +44,22 @@ export class LoginService {
         user.resetPasswordExpires = new Date(Date.now() + 10 * 60000); 
         await this.userRepository.save(user);
 
-        // Initialisation via l'API HTTP (port 443, jamais bloqué par Render)
+        // Instanciation correcte avec le SDK Brevo
         const apiInstance = new Brevo.TransactionalEmailsApi();
-        apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY as string);
+        apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
         const sendSmtpEmail = new Brevo.SendSmtpEmail();
         sendSmtpEmail.subject = "Code de réinitialisation";
-        sendSmtpEmail.sender = { "name": "Support Académie Pro", "email": "contact@academiepro.com" }; // Remplacez par votre email d'expéditeur validé sur Brevo
+        sendSmtpEmail.sender = { "name": "Support Académie Pro", "email": "contact@academiepro.com" };
         sendSmtpEmail.to = [{ "email": email }];
         sendSmtpEmail.textContent = `Votre code OTP est : ${otp}. Il est valide pour 10 minutes.`;
 
         try {
             await apiInstance.sendTransacEmail(sendSmtpEmail);
-            return { message: "Code OTP envoyé via API Brevo", otp };
+            return { message: "Code OTP envoyé via API Brevo" };
         } catch (error) {
             console.error("Erreur API Brevo :", error);
-            return { message: "Erreur lors de l'envoi", error: (error as any).message }; 
+            throw new Error("Impossible d'envoyer l'email.");
         }
     }
 
@@ -67,10 +68,11 @@ export class LoginService {
         if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
             throw new UnauthorizedException('Code invalide ou expiré');
         }
+        
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
         await this.userRepository.save(user);
         return { message: "Mot de passe mis à jour" };
     }
