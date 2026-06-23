@@ -47,19 +47,13 @@ export class LoginService {
         try {
             // Configuration SMTP directe avec forçage IPv4
             const transporter = nodemailer.createTransport({
-                host: 'smtp.gmail.com',
-                port: 465,
-                secure: true,
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
-                },
-                tls: {
-                    rejectUnauthorized: false
-                },
-                family: 4 // Force l'utilisation d'IPv4
-            } as nodemailer.TransportOptions);
-
+    host: process.env.EMAIL_HOST,
+    port: Number(process.env.EMAIL_PORT),
+    secure: false, // Important pour le port 587
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }});
             await transporter.sendMail({
                 from: `"Support Académie Pro" <${process.env.EMAIL_USER}>`,
                 to: email,
