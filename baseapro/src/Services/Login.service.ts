@@ -63,7 +63,7 @@ export class LoginService {
         }
     }
 
-    async verifyOtpAndReset(email: string, otp: string, newPassword: string) {
+   async verifyOtpAndReset(email: string, otp: string, newPassword: string) {
         const user = await this.userRepository.findOne({ where: { email, resetPasswordToken: otp } });
         if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
             throw new UnauthorizedException('Code invalide ou expiré');
@@ -71,8 +71,11 @@ export class LoginService {
         
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
-        user.resetPasswordToken = null;
-        user.resetPasswordExpires = null;
+        
+        // Remplacement de null par undefined pour respecter le typage de votre entité
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        
         await this.userRepository.save(user);
         return { message: "Mot de passe mis à jour" };
     }
