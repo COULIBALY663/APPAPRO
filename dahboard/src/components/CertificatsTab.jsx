@@ -57,8 +57,8 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
               
               return (
                 <React.Fragment key={id}>
-                  <tr style={{ backgroundColor: "#ffffff" }}>
-                    <td style={{ borderRight: "1px solid black" }}><b>#{id}</b></td>
+                  <tr style={{ backgroundColor: "#ffffff", borderBottom: "1px solid black" }}>
+                    <td style={{ borderRight: "1px solid black", }}><b>#{id}</b></td>
                     <td>
                       <strong>{String(c.nom || c.Nom || "").toUpperCase()}</strong><br />
                       {c.prenom || c.Prénom || ""}
