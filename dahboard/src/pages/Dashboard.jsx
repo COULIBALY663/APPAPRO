@@ -155,12 +155,7 @@ export default function Dashboard() {
       </div>
     );
   }
-  // Dans votre formulaire de connexion, à côté du bouton "Se connecter"
-<p onClick={() => window.location.href = "/reset-password"} 
-   style={{ cursor: "pointer", color: "#6c757d", textAlign: "center", marginTop: "15px", fontSize: "14px" }}>
-   Mot de passe oublié ?
-</p>
-
+  
   return (
     
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
