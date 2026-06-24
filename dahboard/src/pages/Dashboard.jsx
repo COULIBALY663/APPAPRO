@@ -22,10 +22,29 @@ export default function Dashboard() {
 
   // Chargement des données au montage
   useEffect(() => {
-    if (isAuthenticated) {
-      // Remplacez par vos appels API réels ici
-      console.log("Données chargées pour l'admin");
-    }
+    const fetchData = async () => {
+      if (!isAuthenticated) return;
+
+      const token = sessionStorage.getItem("adminToken");
+      const headers = { "Authorization": `Bearer ${token}` };
+
+      try {
+        // Appel simultané pour charger les trois listes
+        const [usersRes, certRes, payRes] = await Promise.all([
+          fetch(`${API_URL}/users`, { headers }),
+          fetch(`${API_URL}/certificats`, { headers }),
+          fetch(`${API_URL}/paiements`, { headers })
+        ]);
+
+        if (usersRes.ok) setUsers(await usersRes.json());
+        if (certRes.ok) setCertificats(await certRes.json());
+        if (payRes.ok) setPaiements(await payRes.json());
+      } catch (err) {
+        console.error("Erreur lors du chargement des données :", err);
+      }
+    };
+
+    fetchData();
   }, [isAuthenticated]);
 
   const handleAuthSubmit = async (e) => {
