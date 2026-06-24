@@ -16,7 +16,7 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
       <div style={{ overflowX: "auto", width: "100%" }}>
         <table border="1" cellPadding="8" style={{ borderCollapse: "collapse", width: "100%", fontSize: "13px" }}>
           <thead>
-            <tr style={{ backgroundColor: "#f8f9fa" }}>
+            <tr style={{ backgroundColor: "black", color: "white" }}>
               <th>IDENTIFIANT</th>
               <th>Noms et Prénoms</th>
               <th>Contact (Formulaire)</th>

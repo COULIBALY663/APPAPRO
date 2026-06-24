@@ -11,7 +11,7 @@ export default function UsersTab({ users, onDeleteUser }) {
       
       <table border="1" width="100%" cellPadding="10" style={{ borderCollapse: "collapse", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
         <thead>
-          <tr style={{ backgroundColor: "#f8f9fa", textAlign: "left" }}>
+          <tr style={{ backgroundColor: "black", textAlign: "left" }}>
             <th>ID</th>
             <th>Nom</th>
             <th>Prénom</th>
