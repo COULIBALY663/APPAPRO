@@ -1,112 +1,133 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
-import { registerUser } from "../services/userService.js";
+import { registerUser } from "../services/userService.js"; 
 import UsersTab from "../components/UsersTab";
 import CertificatsTab from "../components/CertificatsTab";
 import PaiementsTab from "../components/PaiementsTab";
 
+// 🌐 URL dynamique : utilise la variable d'environnement ou le local par défaut
 const API_URL = import.meta.env.VITE_API_URL || "https://appapro.onrender.com";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!sessionStorage.getItem("adminToken"));
   const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const [form, setForm] = useState({ nom: "", prenom: "", email: "", password: "", confirmPassword: "" });
+  const [authNom, setAuthNom] = useState("");
+  const [authPrenom, setAuthPrenom] = useState("");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authConfirmPassword, setAuthConfirmPassword] = useState("");
+  const [activationMessage, setActivationMessage] = useState("");
+  
   const [activeTab, setActiveTab] = useState(() => localStorage.getItem("activeTab") || "users");
-
-  // États pour les données
   const [users, setUsers] = useState([]);
   const [certificats, setCertificats] = useState([]);
   const [paiements, setPaiements] = useState([]);
 
-  // Chargement des données au montage
   useEffect(() => {
-    const fetchData = async () => {
-      if (!isAuthenticated) return;
+    localStorage.setItem("activeTab", activeTab);
+  }, [activeTab]);
 
-      const token = sessionStorage.getItem("adminToken");
-      const headers = { "Authorization": `Bearer ${token}` };
+  // ================= UTILS =================
+  const getPaymentBadgeStyle = (statut) => {
+    const baseStyle = { padding: "6px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "bold", display: "inline-block", textAlign: "center", border: "none", width: "100%", maxWidth: "160px" };
+    const norm = String(statut || "").toLowerCase().trim();
+    if (["paid", "success", "completed"].includes(norm)) return { ...baseStyle, backgroundColor: "#d4edda", color: "#155724", border: "1px solid #c3e6cb" };
+    if (["processing", "pending"].includes(norm)) return { ...baseStyle, backgroundColor: "#fff3cd", color: "#856404", border: "1px solid #ffeeba" };
+    return { ...baseStyle, backgroundColor: "#f8d7da", color: "#721c24", border: "1px solid #f5c6cb" };
+  };
 
-      try {
-        // Appel simultané pour charger les trois listes
-        const [usersRes, certRes, payRes] = await Promise.all([
-          fetch(`${API_URL}/users`, { headers }),
-          fetch(`${API_URL}/certificats`, { headers }),
-          fetch(`${API_URL}/paiements`, { headers })
-        ]);
+  const translatePaymentStatus = (statut) => {
+    const norm = String(statut || "").toLowerCase().trim();
+    if (["paid", "success", "completed"].includes(norm)) return "✅ Payé";
+    if (["processing", "pending"].includes(norm)) return "⏳ En cours...";
+    return "🛑 Échoué / Non initié";
+  };
 
-        if (usersRes.ok) setUsers(await usersRes.json());
-        if (certRes.ok) setCertificats(await certRes.json());
-        if (payRes.ok) setPaiements(await payRes.json());
-      } catch (err) {
-        console.error("Erreur lors du chargement des données :", err);
-      }
-    };
+  // ================= APPELS API =================
+  const fetchUsers = async () => {
+    try { const res = await fetch(`${API_URL}/users`); setUsers(await res.json() || []); } catch (err) { console.error(err); }
+  };
+  const fetchCertificats = async () => {
+    try { const res = await fetch(`${API_URL}/certificat`); setCertificats(await res.json() || []); } catch (err) { console.error(err); }
+  };
+  const fetchPaiements = async () => {
+    try { const res = await fetch(`${API_URL}/paiement`); setPaiements(await res.json() || []); } catch (err) { console.error(err); }
+  };
 
-    fetchData();
-  }, [isAuthenticated]);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (activeTab === "users") fetchUsers();
+    else if (activeTab === "certificats") { fetchCertificats(); fetchPaiements(); }
+    else if (activeTab === "paiements") fetchPaiements();
+  }, [activeTab, isAuthenticated]);
+
+  // ================= ACTIONS =================
+  const handleValiderDossier = async (id, statutActuel) => {
+    const nouveauStatut = statutActuel === "Traité" ? "En attente" : "Traité";
+    if (!window.confirm(`Passer le dossier #${id} à : ${nouveauStatut} ?`)) return;
+    try {
+      const res = await fetch(`${API_URL}/certificat/${id}/statut`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ statut: nouveauStatut }),
+      });
+      if (res.ok) fetchCertificats(); // Rafraîchir après modification
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm("Supprimer cet utilisateur ?")) return;
+    try { if ((await fetch(`${API_URL}/users/${id}`, { method: "DELETE" })).ok) fetchUsers(); } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteCertificat = async (id) => {
+    if (!window.confirm("Supprimer ce certificat ?")) return;
+    try { if ((await fetch(`${API_URL}/certificat/${id}`, { method: "DELETE" })).ok) fetchCertificats(); } catch (err) { console.error(err); }
+  };
 
   const handleAuthSubmit = async (e) => {
     e.preventDefault();
     if (isRegisterMode) {
-      if (form.password !== form.confirmPassword) return alert("Les mots de passe ne correspondent pas !");
+      if (authPassword !== authConfirmPassword) return alert("❌ Les mots de passe ne correspondent pas !");
       try {
-        await registerUser({ prenom: form.prenom, nom: form.nom, email: form.email, password: form.password });
-        alert("Inscription réussie ! Contactez le 0564225178 pour validation.");
+        await registerUser({ prenom: authPrenom, nom: authNom, email: authEmail, password: authPassword });
+        alert("🔒 Inscription enregistrée !");
+        setActivationMessage("⚠️ Veuillez contacter le 0564225178 pour activation.");
         setIsRegisterMode(false);
-      } catch (err) { alert("Erreur inscription."); }
+      } catch (err) { alert("❌ Erreur inscription."); }
     } else {
       try {
-        const loginRes = await fetch(`${API_URL}/login/connexion`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: form.email, password: form.password })
-        });
-        if (!loginRes.ok) return alert("Connexion échouée.");
-        const data = await loginRes.json();
-        if (data.access_token) {
-          sessionStorage.setItem("adminToken", data.access_token);
+        const resUsers = await fetch(`${API_URL}/users`);
+        const allUsers = await resUsers.json() || [];
+        const matchingUser = allUsers.find(u => String(u.email).toLowerCase().trim() === String(authEmail).toLowerCase().trim());
+        if (!matchingUser) return alert("❌ Aucun compte trouvé.");
+        const roleReel = matchingUser.role ? String(matchingUser.role).toLowerCase().trim() : "en attente";
+        if (roleReel === "admin" || roleReel === "superadmin") {
+          sessionStorage.setItem("adminToken", "CONNECTED_SECRET_TOKEN");
           setIsAuthenticated(true);
+        } else {
+          setActivationMessage("🛑 Accès refusé : Contactez le 0564225178.");
         }
-      } catch (err) { alert("Erreur serveur."); }
+      } catch (err) { alert("❌ Erreur connexion."); }
     }
   };
 
-  const handleLogout = () => { sessionStorage.clear(); window.location.reload(); };
-  const handleDeleteUser = (id) => { console.log("Suppression utilisateur", id); };
-  const handleValiderDossier = (id) => { console.log("Validation dossier", id); };
-  const handleDeleteCertificat = (id) => { console.log("Suppression certificat", id); };
-  
-  const getPaymentBadgeStyle = (statut) => ({
-    padding: "4px 8px", borderRadius: "12px", fontSize: "12px", fontWeight: "bold",
-    backgroundColor: statut === 'completed' ? "#d4edda" : "#fff3cd",
-    color: statut === 'completed' ? "#155724" : "#856404"
-  });
+  const handleLogout = () => { sessionStorage.removeItem("adminToken"); window.location.reload(); };
 
-  const translatePaymentStatus = (statut) => (statut === 'completed' ? "Payé" : "En attente");
-
+  // ================= RENDER =================
   if (!isAuthenticated) {
     return (
-      <div style={styles.authContainer}>
-        <div style={styles.authCard}>
-          <h2 style={styles.title}>{isRegisterMode ? "Créer un compte" : "Connexion Admin"}</h2>
-          <form onSubmit={handleAuthSubmit} style={styles.form}>
-            {isRegisterMode && (
-              <>
-                <input style={styles.input} placeholder="Nom" onChange={(e) => setForm({...form, nom: e.target.value})} required />
-                <input style={styles.input} placeholder="Prénom" onChange={(e) => setForm({...form, prenom: e.target.value})} required />
-              </>
-            )}
-            <input type="email" style={styles.input} placeholder="E-mail" onChange={(e) => setForm({...form, email: e.target.value})} required />
-            <input type="password" style={styles.input} placeholder="Mot de passe" onChange={(e) => setForm({...form, password: e.target.value})} required />
-            {isRegisterMode && <input type="password" style={styles.input} placeholder="Confirmer mot de passe" onChange={(e) => setForm({...form, confirmPassword: e.target.value})} required />}
-            <button type="submit" style={styles.button}>{isRegisterMode ? "S'inscrire" : "Se connecter"}</button>
-          </form>
-          <p onClick={() => setIsRegisterMode(!isRegisterMode)} style={styles.toggleText}>
-            {isRegisterMode ? "Déjà un compte ? Connexion" : "Pas de compte ? S'inscrire"}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "#f3f4f6", fontFamily: "Arial", padding: "20px" }}>
+        <form onSubmit={handleAuthSubmit} style={{ background: "white", padding: "30px", borderRadius: "8px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)", width: "100%", maxWidth: "420px" }}>
+          <h2 style={{ textAlign: "center", color: "#0d47a1" }}>{isRegisterMode ? "Inscription" : "Connexion Admin"}</h2>
+          {activationMessage && <div style={{ color: "#856404", background: "#fff3cd", padding: "10px", marginBottom: "15px", textAlign: "center" }}>{activationMessage}</div>}
+          <input type="email" placeholder="Email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
+          <input type="password" placeholder="Mot de passe" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
+          <button type="submit" style={{ width: "100%", padding: "10px", background: "#2563eb", color: "white", border: "none" }}>{isRegisterMode ? "S'inscrire" : "Se connecter"}</button>
+          <p onClick={() => setIsRegisterMode(!isRegisterMode)} style={{ cursor: "pointer", color: "#0d6efd", textAlign: "center", marginTop: "15px" }}>
+            {isRegisterMode ? "Déjà inscrit ? Connectez-vous" : "Pas de compte ? S'inscrire"}
           </p>
-        </div>
+        </form>
       </div>
     );
   }
@@ -114,35 +135,15 @@ export default function Dashboard() {
   return (
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div style={{ flex: 1, padding: "20px", overflowX: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-          <h1 style={{ color: "#0d47a1", fontStyle: "italic", fontSize: "40px" }}>TABLEAU DE BORD</h1>
-          <button onClick={handleLogout} style={styles.logoutBtn}>🚪 Déconnexion</button>
+      <div style={{ flex: 1, padding: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <h1>TABLEAU DE BORD</h1>
+          <button onClick={handleLogout} style={{ background: "#6c757d", color: "white", padding: "8px 16px", border: "none", cursor: "pointer" }}>🚪 Déconnexion</button>
         </div>
-
         {activeTab === "users" && <UsersTab users={users} onDeleteUser={handleDeleteUser} />}
-        {activeTab === "certificats" && (
-          <CertificatsTab 
-            certificats={certificats} paiements={paiements} onValiderDossier={handleValiderDossier} 
-            onDeleteCertificat={handleDeleteCertificat} getPaymentBadgeStyle={getPaymentBadgeStyle}
-            translatePaymentStatus={translatePaymentStatus}
-          />
-        )}
-        {activeTab === "paiements" && (
-          <PaiementsTab paiements={paiements} getPaymentBadgeStyle={getPaymentBadgeStyle} translatePaymentStatus={translatePaymentStatus} />
-        )}
+        {activeTab === "certificats" && <CertificatsTab certificats={certificats} paiements={paiements} onValiderDossier={handleValiderDossier} onDeleteCertificat={handleDeleteCertificat} getPaymentBadgeStyle={getPaymentBadgeStyle} translatePaymentStatus={translatePaymentStatus} />}
+        {activeTab === "paiements" && <PaiementsTab paiements={paiements} getPaymentBadgeStyle={getPaymentBadgeStyle} translatePaymentStatus={translatePaymentStatus} />}
       </div>
     </div>
   );
 }
-
-const styles = {
-  authContainer: { height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f0f2f5" },
-  authCard: { background: "white", padding: "40px", borderRadius: "12px", boxShadow: "0 10px 25px rgba(0,0,0,0.1)", width: "100%", maxWidth: "400px" },
-  title: { textAlign: "center", marginBottom: "20px" },
-  form: { display: "flex", flexDirection: "column", gap: "15px" },
-  input: { padding: "12px", border: "1px solid #ddd", borderRadius: "6px" },
-  button: { padding: "12px", background: "#007bff", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" },
-  toggleText: { textAlign: "center", marginTop: "15px", color: "#007bff", cursor: "pointer" },
-  logoutBtn: { background: "#6c757d", color: "white", border: "none", padding: "8px 16px", cursor: "pointer", borderRadius: "4px" }
-};
