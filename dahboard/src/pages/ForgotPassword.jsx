@@ -9,7 +9,7 @@ export default function ForgotPassword() {
   // 1. Envoi de l'email pour demander l'OTP
   const handleSendEmail = async (e) => {
     e.preventDefault();
-    const res = await fetch("https://appapro.onrender.com/users/request-otp", {
+    const res = await fetch("https://appapro.onrender.com/login/request-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: formData.email })
@@ -38,7 +38,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) return alert("Les mots de passe ne correspondent pas !");
     
-    const res = await fetch("https://appapro.onrender.com/users/verify-otp", {
+    const res = await fetch("https://appapro.onrender.com/login/verify-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
