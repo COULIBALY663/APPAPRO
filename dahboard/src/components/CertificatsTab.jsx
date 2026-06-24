@@ -57,18 +57,18 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
               
               return (
                 <React.Fragment key={id}>
-                  <tr style={{ backgroundColor: "#ffffff" }}>
-                    <td style={{ borderRight: "1px solid black", }}><b>#{id}</b></td>
+                  <tr style={{ backgroundColor: "#ffffff", borderBottom: "1px solid black", borderRight: "1px solid black" }}>
+                    <td ><b>#{id}</b></td>
                     <td>
                       <strong>{String(c.nom || c.Nom || "").toUpperCase()}</strong><br />
                       {c.prenom || c.Prénom || ""}
                     </td>
-                    <td style={{ borderRight: "1px solid black" }}>
+                    <td>
                       📱 {c.telephone || c.Téléphone || "N/A"}<br />
                       <span style={{ fontSize: "11px", color: "#777" }}>{c.email || "Non disponible"}</span>
                     </td>
                     
-                    <td style={{ textAlign: "center", borderRight: "1px solid black" }}>
+                    <td style={{ textAlign: "center" }}>
                       {c.situationmatrimoniale && (
                         <span style={{ backgroundColor: "#e0f2fe", color: "#0369a1", padding: "4px 8px", borderRadius: "4px", fontWeight: "500" }}>
                           {c.situationmatrimoniale}
@@ -76,7 +76,7 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                       )}
                     </td>
 
-                    <td style={{ textAlign: "center", color: "#334155",borderRight: "1px solid black" }}>
+                    <td style={{ textAlign: "center", color: "#334155" }}>
                       {c.nomconjoint || ""}
                     </td>
 
