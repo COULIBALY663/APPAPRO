@@ -54,12 +54,13 @@ export default function Dashboard() {
     try { const res = await fetch(`${API_URL}/paiement`); setPaiements(await res.json() || []); } catch (err) { console.error(err); }
   };
 
+  // Chargement automatique des données
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (activeTab === "users") fetchUsers();
-    else if (activeTab === "certificats") { fetchCertificats(); fetchPaiements(); }
-    else if (activeTab === "paiements") fetchPaiements();
-  }, [activeTab, isAuthenticated]);
+    fetchUsers();
+    fetchCertificats();
+    fetchPaiements();
+  }, [isAuthenticated]);
 
   // ================= ACTIONS =================
   const handleValiderDossier = async (id, statutActuel) => {
@@ -71,7 +72,7 @@ export default function Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ statut: nouveauStatut }),
       });
-      if (res.ok) fetchCertificats(); // Rafraîchir après modification
+      if (res.ok) fetchCertificats();
     } catch (err) { console.error(err); }
   };
 
@@ -121,8 +122,15 @@ export default function Dashboard() {
         <form onSubmit={handleAuthSubmit} style={{ background: "white", padding: "30px", borderRadius: "8px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)", width: "100%", maxWidth: "420px" }}>
           <h2 style={{ textAlign: "center", color: "#0d47a1" }}>{isRegisterMode ? "Inscription" : "Connexion Admin"}</h2>
           {activationMessage && <div style={{ color: "#856404", background: "#fff3cd", padding: "10px", marginBottom: "15px", textAlign: "center" }}>{activationMessage}</div>}
+          {isRegisterMode && (
+            <>
+              <input type="text" placeholder="Nom" value={authNom} onChange={(e) => setAuthNom(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
+              <input type="text" placeholder="Prénom" value={authPrenom} onChange={(e) => setAuthPrenom(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
+            </>
+          )}
           <input type="email" placeholder="Email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
           <input type="password" placeholder="Mot de passe" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
+          {isRegisterMode && <input type="password" placeholder="Confirmer mot de passe" value={authConfirmPassword} onChange={(e) => setAuthConfirmPassword(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />}
           <button type="submit" style={{ width: "100%", padding: "10px", background: "#2563eb", color: "white", border: "none" }}>{isRegisterMode ? "S'inscrire" : "Se connecter"}</button>
           <p onClick={() => setIsRegisterMode(!isRegisterMode)} style={{ cursor: "pointer", color: "#0d6efd", textAlign: "center", marginTop: "15px" }}>
             {isRegisterMode ? "Déjà inscrit ? Connectez-vous" : "Pas de compte ? S'inscrire"}
@@ -137,7 +145,7 @@ export default function Dashboard() {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div style={{ flex: 1, padding: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h1>TABLEAU DE BORD</h1>
+          <h1 style={{ color: "#0d47a1" }}>TABLEAU DE BORD</h1>
           <button onClick={handleLogout} style={{ background: "#6c757d", color: "white", padding: "8px 16px", border: "none", cursor: "pointer" }}>🚪 Déconnexion</button>
         </div>
         {activeTab === "users" && <UsersTab users={users} onDeleteUser={handleDeleteUser} />}
