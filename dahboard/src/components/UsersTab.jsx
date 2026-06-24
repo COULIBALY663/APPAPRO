@@ -11,7 +11,7 @@ export default function UsersTab({ users, onDeleteUser }) {
       
       <table border="1" width="100%" cellPadding="10" style={{ borderCollapse: "collapse", boxShadow: "0 2px 5px rgba(0,0,0,0.05)" }}>
         <thead>
-          <tr style={{ backgroundColor: "black", textAlign: "left" }}>
+          <tr style={{ backgroundColor: "black", textAlign: "left", color: "white" }}>
             <th>ID</th>
             <th>Nom</th>
             <th>Prénom</th>
@@ -23,8 +23,8 @@ export default function UsersTab({ users, onDeleteUser }) {
           {safeUsers.map((u) => {
             const id = u.users_id || u.id;
             return (
-              <tr key={id} style={{ borderBottom: "1px solid #ddd" }}>
-                <td><b>#{id}</b></td>
+              <tr key={id} style={{ borderBottom: "1px solid black" }}>
+                <td ><b>#{id}</b></td>
                 <td>{u.nom}</td>
                 <td>{u.prenom}</td>
                 <td>{u.email}</td>
