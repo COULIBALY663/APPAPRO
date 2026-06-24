@@ -3,6 +3,7 @@ import React from "react";
 export default function UsersTab({ users, onDeleteUser }) {
   // Sécurité : si users est undefined/null, on utilise un tableau vide []
   const safeUsers = Array.isArray(users) ? users : [];
+  
 
   return (
     <div>

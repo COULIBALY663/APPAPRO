@@ -58,17 +58,17 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
               return (
                 <React.Fragment key={id}>
                   <tr style={{ backgroundColor: "#ffffff" }}>
-                    <td><b>#{id}</b></td>
+                    <td style={{ borderRight: "1px solid black" }}><b>#{id}</b></td>
                     <td>
                       <strong>{String(c.nom || c.Nom || "").toUpperCase()}</strong><br />
                       {c.prenom || c.Prénom || ""}
                     </td>
-                    <td>
+                    <td style={{ borderRight: "1px solid black" }}>
                       📱 {c.telephone || c.Téléphone || "N/A"}<br />
                       <span style={{ fontSize: "11px", color: "#777" }}>{c.email || "Non disponible"}</span>
                     </td>
                     
-                    <td style={{ textAlign: "center" }}>
+                    <td style={{ textAlign: "center", borderRight: "1px solid black" }}>
                       {c.situationmatrimoniale && (
                         <span style={{ backgroundColor: "#e0f2fe", color: "#0369a1", padding: "4px 8px", borderRadius: "4px", fontWeight: "500" }}>
                           {c.situationmatrimoniale}
@@ -76,16 +76,16 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                       )}
                     </td>
 
-                    <td style={{ textAlign: "center", color: "#334155" }}>
+                    <td style={{ textAlign: "center", color: "#334155",borderRight: "1px solid black" }}>
                       {c.nomconjoint || ""}
                     </td>
 
-                    <td style={{ textAlign: "center" }}>{renderFile(c.extrait)}</td>
-                    <td style={{ textAlign: "center" }}>{renderFile(c.parent_recto)}</td>
-                    <td style={{ textAlign: "center" }}>{renderFile(c.parent_verso)}</td>
-                    <td style={{ textAlign: "center" }}>{renderFile(c.recto_piece)}</td>
-                    <td style={{ textAlign: "center" }}>{renderFile(c.verso_piece)}</td>
-                    <td style={{ textAlign: "center" }}>{renderFile(c.acte_individuel)}</td>
+                    <td style={{ textAlign: "center", borderRight: "1px solid black" }}>{renderFile(c.extrait)}</td>
+                    <td style={{ textAlign: "center", borderRight: "1px solid black" }}>{renderFile(c.parent_recto)}</td>
+                    <td style={{ textAlign: "center", borderRight: "1px solid black" }}>{renderFile(c.parent_verso)}</td>
+                    <td style={{ textAlign: "center", borderRight: "1px solid black" }}>{renderFile(c.recto_piece)}</td>
+                    <td style={{ textAlign: "center", borderRight: "1px solid black" }}>{renderFile(c.verso_piece)}</td>
+                    <td style={{ textAlign: "center", borderRight: "1px solid black" }}>{renderFile(c.acte_individuel)}</td>
                     <td style={{ textAlign: "center" }}>
                       {c.statut === "Traité" ? (
                         <button onClick={() => onValiderDossier(id, c.statut)} style={{ background: "#198754", color: "white", border: "none", padding: "6px 12px", cursor: "pointer", borderRadius: "4px", fontWeight: "bold" }}>
