@@ -120,18 +120,34 @@ export default function Dashboard() {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", backgroundColor: "#f3f4f6", fontFamily: "Arial", padding: "20px" }}>
         <form onSubmit={handleAuthSubmit} style={{ background: "white", padding: "30px", borderRadius: "8px", boxShadow: "0 4px 15px rgba(0,0,0,0.1)", width: "100%", maxWidth: "420px" }}>
+          
           <h2 style={{ textAlign: "center", color: "#0d47a1" }}>{isRegisterMode ? "Inscription" : "Connexion Admin"}</h2>
           {activationMessage && <div style={{ color: "#856404", background: "#fff3cd", padding: "10px", marginBottom: "15px", textAlign: "center" }}>{activationMessage}</div>}
+          
           {isRegisterMode && (
             <>
               <input type="text" placeholder="Nom" value={authNom} onChange={(e) => setAuthNom(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
               <input type="text" placeholder="Prénom" value={authPrenom} onChange={(e) => setAuthPrenom(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
             </>
           )}
+          
           <input type="email" placeholder="Email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
           <input type="password" placeholder="Mot de passe" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />
+          
           {isRegisterMode && <input type="password" placeholder="Confirmer mot de passe" value={authConfirmPassword} onChange={(e) => setAuthConfirmPassword(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "10px" }} required />}
-          <button type="submit" style={{ width: "100%", padding: "10px", background: "#2563eb", color: "white", border: "none" }}>{isRegisterMode ? "S'inscrire" : "Se connecter"}</button>
+          
+          <button type="submit" style={{ width: "100%", padding: "10px", background: "#2563eb", color: "white", border: "none", cursor: "pointer" }}>
+            {isRegisterMode ? "S'inscrire" : "Se connecter"}
+          </button>
+
+          {/* LE LIEN EST MAINTENANT ICI, DANS LE FORMULAIRE */}
+          {!isRegisterMode && (
+            <p onClick={() => window.location.href = "/reset-password"} 
+               style={{ cursor: "pointer", color: "#6c757d", textAlign: "center", marginTop: "15px", fontSize: "14px", textDecoration: "underline" }}>
+               Mot de passe oublié ?
+            </p>
+          )}
+
           <p onClick={() => setIsRegisterMode(!isRegisterMode)} style={{ cursor: "pointer", color: "#0d6efd", textAlign: "center", marginTop: "15px" }}>
             {isRegisterMode ? "Déjà inscrit ? Connectez-vous" : "Pas de compte ? S'inscrire"}
           </p>
@@ -139,8 +155,14 @@ export default function Dashboard() {
       </div>
     );
   }
+  // Dans votre formulaire de connexion, à côté du bouton "Se connecter"
+<p onClick={() => window.location.href = "/reset-password"} 
+   style={{ cursor: "pointer", color: "#6c757d", textAlign: "center", marginTop: "15px", fontSize: "14px" }}>
+   Mot de passe oublié ?
+</p>
 
   return (
+    
     <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div style={{ flex: 1, padding: "20px" }}>
@@ -154,4 +176,5 @@ export default function Dashboard() {
       </div>
     </div>
   );
+  
 }
