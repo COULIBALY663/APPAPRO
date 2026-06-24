@@ -23,7 +23,7 @@ export default function UsersTab({ users, onDeleteUser }) {
           {safeUsers.map((u) => {
             const id = u.users_id || u.id;
             return (
-              <tr key={id} style={{ borderBottom: "1px solid black" }}>
+              <tr key={id} style={{ borderBottom: "1px solid black", borderRight: "1px solid black" }}>
                 <td ><b>#{id}</b></td>
                 <td>{u.nom}</td>
                 <td>{u.prenom}</td>
