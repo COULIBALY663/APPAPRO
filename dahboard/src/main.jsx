@@ -1,16 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import ResetPassword from "./pages/ResetPassword";
-import VerifyOtp from "./pages/VerifyOtp";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App"; // Importez seulement App ici
+import "./index.css"; 
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
