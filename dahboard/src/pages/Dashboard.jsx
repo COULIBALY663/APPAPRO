@@ -142,7 +142,7 @@ export default function Dashboard() {
 
           {/* LE LIEN EST MAINTENANT ICI, DANS LE FORMULAIRE */}
           {!isRegisterMode && (
-            <p onClick={() => window.location.href = "/reset-password"} 
+            <p onClick={() => window.location.href = "/ForgotPassword"} 
                style={{ cursor: "pointer", color: "#6c757d", textAlign: "center", marginTop: "15px", fontSize: "14px", textDecoration: "underline" }}>
                Mot de passe oublié ?
             </p>
