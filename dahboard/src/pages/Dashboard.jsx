@@ -98,21 +98,58 @@ export default function Dashboard() {
       } catch (err) { alert("❌ Erreur inscription."); }
     } else {
       try {
-        const resUsers = await fetch(`${API_URL}/users`);
-        const allUsers = await resUsers.json() || [];
-        const matchingUser = allUsers.find(u => String(u.email).toLowerCase().trim() === String(authEmail).toLowerCase().trim());
-        if (!matchingUser) return alert("❌ Aucun compte trouvé.");
-        const roleReel = matchingUser.role ? String(matchingUser.role).toLowerCase().trim() : "en attente";
-        if (roleReel === "admin" || roleReel === "superadmin") {
-          sessionStorage.setItem("adminToken", "CONNECTED_SECRET_TOKEN");
-          setIsAuthenticated(true);
-        } else {
-          setActivationMessage("🛑 Accès refusé : Contactez le 0564225178.");
-        }
-      } catch (err) { alert("❌ Erreur connexion."); }
-    }
-  };
+  // Vérification email + mot de passe
+  const loginRes = await fetch(`${API_URL}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: authEmail,
+      password: authPassword,
+    }),
+  });
 
+  if (!loginRes.ok) {
+    return alert("Email ou mot de passe incorrect");
+  }
+
+  // Récupération des utilisateurs pour vérifier le rôle
+  const usersRes = await fetch(`${API_URL}/users`);
+  const users = await usersRes.json();
+
+  const user = users.find(
+    (u) =>
+      String(u.email).toLowerCase().trim() ===
+      String(authEmail).toLowerCase().trim()
+  );
+
+  if (
+    !user ||
+    !["admin", "superadmin"].includes(
+      String(user.role).toLowerCase().trim()
+    )
+  ) {
+    return alert("Accès réservé aux administrateurs, veillez contacter le 0564225178 pour activation.");
+  }
+
+  // Connexion réussie
+  const loginData = await loginRes.json();
+
+  sessionStorage.setItem(
+    "adminToken",
+    loginData.access_token
+  );
+
+  setIsAuthenticated(true);
+
+} catch (err) {
+  console.error(err);
+  alert("Erreur de connexion");
+}
+}
+  }
+      
   const handleLogout = () => { sessionStorage.removeItem("adminToken"); window.location.reload(); };
 
   // ================= RENDER =================
