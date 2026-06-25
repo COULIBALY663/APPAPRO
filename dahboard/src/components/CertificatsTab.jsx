@@ -104,7 +104,7 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                     </td>
                   </tr>
 
-                  <tr style={{ backgroundColor: "#fdf8e2", borderBottom: "1px solid black", borderRight: "1px solid black" }}>
+                  <tr style={{ backgroundColor: "#fdf8e2", borderBottom: "1px solid black", borderRight: "1px solid black", borderLeft: "1px solid black" }}>
                     <td colSpan="13" style={{ padding: "8px 15px", borderTop: "none" }}>
                       {paiementLie ? (
                         <div style={{ display: "flex", gap: "25px", alignItems: "center", fontSize: "12px", color: "#6c4b00" }}>
