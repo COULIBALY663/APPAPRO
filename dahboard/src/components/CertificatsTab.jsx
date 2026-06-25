@@ -9,7 +9,7 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
   return (
     <div>
       <h2 style={{ fontSize: "50px", textAlign: "center", backgroundColor: "orange", fontWeight: "bold", color: 'white', padding: "8px 12px", borderRadius: "4px" }}>
-        📄 Gestion des Certificats
+        📄 GESTION DES DOCUMENTS 
       </h2>
       <p style={{ fontWeight: "bold", color: "#555" }}>Total: {safeCertificats.length}</p>
       
@@ -58,7 +58,7 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
               return (
                 <React.Fragment key={id}>
                   <tr style={{ backgroundColor: "#ffffff", borderBottom: "1px solid black", borderRight: "1px solid black" }}>
-                    <td ><b>#{id}</b></td>
+                    <td style={{ borderRight: "1px solid black" }}><b>#{id}</b></td>
                     <td>
                       <strong>{String(c.nom || c.Nom || "").toUpperCase()}</strong><br />
                       {c.prenom || c.Prénom || ""}
@@ -104,7 +104,7 @@ export default function CertificatsTab({ certificats, paiements, onValiderDossie
                     </td>
                   </tr>
 
-                  <tr style={{ backgroundColor: "#fdf8e2", borderBottom: "1px solid black" }}>
+                  <tr style={{ backgroundColor: "#fdf8e2", borderBottom: "1px solid black", borderRight: "1px solid black" }}>
                     <td colSpan="13" style={{ padding: "8px 15px", borderTop: "none" }}>
                       {paiementLie ? (
                         <div style={{ display: "flex", gap: "25px", alignItems: "center", fontSize: "12px", color: "#6c4b00" }}>
