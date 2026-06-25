@@ -22,17 +22,30 @@ export default function ForgotPassword() {
   };
 
   // 2. Vérification du code OTP uniquement
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    // Ici, vous pourriez appeler une route qui vérifie juste l'OTP
-    // Pour l'instant, on passe à l'étape 3 si le code est saisi
-    if (formData.otp.length === 6) { 
-        setStep(3);
-    } else {
-        alert("Veuillez saisir un code valide.");
-    }
-  };
+     const handleVerifyOtp = async (e) => {
+  e.preventDefault();
+  
+  // Appeler le backend pour valider le code
+  try {
+    const res = await fetch("https://appapro.onrender.com/login/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        email: formData.email, 
+        otp: formData.otp, 
+        newPassword: "temp" // On envoie un mot de passe temporaire pour vérifier l'OTP
+      })
+    });
 
+    if (res.ok) {
+      setStep(3); // On passe à l'étape du nouveau mot de passe
+    } else {
+      alert("Code OTP invalide ou expiré.");
+    }
+  } catch (err) {
+    alert("Erreur de connexion au serveur.");
+  }
+};
   // 3. Mise à jour finale du mot de passe
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
