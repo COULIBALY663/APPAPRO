@@ -99,7 +99,7 @@ export default function Dashboard() {
     } else {
       try {
   // Vérification email + mot de passe
-  const loginRes = await fetch(`${API_URL}/users`, {
+  const loginRes = await fetch(`${API_URL}/login/connexion`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
