@@ -18,7 +18,7 @@ export default function Navbar() {
         <Link to="/" style={logoContainerStyle} className="clickable-link">
           <img src={logo} alt="Académie Pro Logo" style={logoImgStyle} />
           <div style={logoTextStyle}>
-            <h2 style={logoTitleStyle}>ACADÉMIE PRO</h2>
+            <h2 style={logoTitleStyle}>ACADEMY PRO</h2>
             <p style={logoSubTitleStyle}>Services numériques & Informatique</p>
           </div>
         </Link>
@@ -31,12 +31,10 @@ export default function Navbar() {
         {/* 2. TOUS LES LIENS D'ORIGINE */}
         <div style={{ ...menuStyle, display: isOpen ? "flex" : "" }} className="nav-links">
           <Link to="/" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Accueil</Link>
-          <Link to="/documents" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Documents</Link>
-          <Link to="/formations" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Formations</Link>
+          <Link to="/documents" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Services</Link>
           <Link to="/marche" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Marché PC</Link>
-          <Link to="/chat" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Chat</Link>
           <Link to="/apropos" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">À propos</Link>
-          <Link to="/contact" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Contact</Link>
+          <Link to="/contact" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Service client</Link>
         </div>
 
         {/* 3. BOUTONS D'ACTION */}
