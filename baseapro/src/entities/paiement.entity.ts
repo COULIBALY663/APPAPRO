@@ -41,9 +41,8 @@ export class Paiement {
   })
   statut!: string;
 
-  @Column()
-  telephone!:string;
-   ;
+  @Column({ type: 'varchar', length: 20, nullable: true }) // Ajoutez nullable: true ici
+  telephone !: string;
 
   @Column("decimal", { nullable: true }) 
   montant!: number;
