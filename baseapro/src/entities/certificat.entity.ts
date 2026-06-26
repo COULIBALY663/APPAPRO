@@ -13,7 +13,7 @@ export class Certificat {
     prenom!: string;
 
     @Column()
-    telephone!: number;
+    telephone!: string;
 
     @Column({ nullable: true })
     statut?: string; // Ajouté car utilisé dans votre logique de service

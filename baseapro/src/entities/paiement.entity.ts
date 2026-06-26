@@ -42,7 +42,8 @@ export class Paiement {
   statut!: string;
 
   @Column()
-  telephone!: string;
+  telephone!:string;
+   ;
 
   @Column("decimal", { nullable: true }) 
   montant!: number;
