@@ -76,4 +76,19 @@ export class CertificatService {
     await this.certificatRepository.delete(id);
     return true;
   }
+  // Ajoutez cette méthode dans votre classe CertificatService
+  async updateStatutDossier(id: number, nouveauStatut: string): Promise<Certificat> {
+    // 1. On vérifie d'abord si le certificat existe
+    const certificat = await this.certificatRepository.findOne({ where: { id } });
+    
+    if (!certificat) {
+      throw new NotFoundException(`Certificat avec l'ID ${id} introuvable`);
+    }
+
+    // 2. On met à jour le statut
+    certificat.statut = nouveauStatut;
+
+    // 3. On sauvegarde
+    return await this.certificatRepository.save(certificat);
+  }
 }
