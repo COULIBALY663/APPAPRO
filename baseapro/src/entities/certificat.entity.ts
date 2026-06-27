@@ -15,8 +15,8 @@ export class Certificat {
    @Column({ type: 'varchar', length: 20, nullable: true })
    telephone!: string;
 
-    @Column()
-    statut?: string; // Ajouté car utilisé dans votre logique de service
+    @Column({ default: 'En attente' })
+    statut!: string;
 
     @Column({ nullable: true })
     extrait?: string;
