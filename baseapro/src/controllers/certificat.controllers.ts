@@ -49,7 +49,11 @@ export class CertificatController {
   async createCertificat(@Body() body: any, @UploadedFiles() files: any) {
     return this.certificatRepository.createCertificat(body, files);
   }
-
+// 📄 GET ALL
+  @Get()
+  async getAll() {
+    return this.certificatRepository.getAllCertificats();
+  }
   // 🔍 GET BY ID
   @Get(':id')
   async findById(@Param('id') id: string) {
