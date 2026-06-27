@@ -1,12 +1,10 @@
-import { Injectable, Inject } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import axios from "axios";
 import { PaiementRepository } from "../repository/paiement.repository";
 
 @Injectable()
 export class PaiementService {
-  constructor(
-    private readonly paiementRepo: PaiementRepository
-  ) {}
+  constructor(private readonly paiementRepo: PaiementRepository) {}
 
   // =========================================================================
   // 1. INIT PAIEMENT
@@ -96,57 +94,51 @@ export class PaiementService {
     }
   }
 
-  // =========================================================================
-  // 2. NOTIFY (Webhook de mise à jour automatique du statut)
-  // =========================================================================
- async notify(data: any) {
-  console.log("📥 [WEBHOOK] Données brutes reçues :", JSON.stringify(data));
+  async notify(data: any) {
+    console.log("📥 [WEBHOOK] Données brutes reçues :", JSON.stringify(data));
 
-  // Extraction flexible : PayDunya envoie souvent un objet 'invoice'
-  const invoice = data.invoice || data;
-  const token = invoice?.token;
-  const rawStatus = invoice?.status;
+    // Extraction de la structure PayDunya
+    const root = data.data ? data.data : data;
+    const token = root.invoice?.token;
+    const rawStatus = root.status;
 
-  if (!token) {
-    console.error("❌ Notification ignorée : Pas de token trouvé.");
-    return;
+    console.log(`🔍 Extraction - Token: ${token}, Statut: ${rawStatus}`);
+
+    if (!token) {
+      console.error("❌ Notification ignorée : Aucun token trouvé.");
+      return;
+    }
+
+    const paiement = await this.paiementRepo.findByPaydunyaToken(token);
+    if (!paiement) {
+      console.error(`❌ Paiement introuvable pour le token : ${token}`);
+      return;
+    }
+
+    // Normalisation du statut
+    let statut = "processing";
+    if (rawStatus === "completed") {
+      statut = "paid";
+    } else if (["failed", "cancelled"].includes(rawStatus)) {
+      statut = rawStatus;
+    }
+
+    // Mise à jour unique
+    await this.paiementRepo.updateStatut(
+      paiement.transaction_id,
+      statut,
+      token,
+      paiement.payment_url,
+      JSON.stringify(data)
+    );
+    
+    console.log(`✅ Base de données mise à jour : ${paiement.transaction_id} -> ${statut}`);
   }
 
-  const paiement = await this.paiementRepo.findByPaydunyaToken(token);
-  if (!paiement) {
-    console.error(`❌ Paiement introuvable pour le token : ${token}`);
-    return;
-  }
-
-  // Normalisation du statut
-  // PayDunya utilise "completed" pour un paiement réussi
-  let statut = "processing";
-  if (rawStatus === "completed") {
-    statut = "paid";
-  } else if (["failed", "cancelled"].includes(rawStatus)) {
-    statut = rawStatus;
-  }
-
-  await this.paiementRepo.updateStatut(
-    paiement.transaction_id,
-    statut,
-    token,
-    paiement.payment_url,
-    JSON.stringify(data)
-  );
-  
-  console.log(`✅ Base de données mise à jour : ${paiement.transaction_id} -> ${statut}`);
-}
-  // =========================================================================
-  // 3. FIND ALL (🔥 Nouvelle méthode appelée par le contrôleur)
-  // =========================================================================
   async findAll() {
     return this.paiementRepo.findAll();
   }
 
-  // =========================================================================
-  // 4. CHECK
-  // =========================================================================
   async check(transaction_id: string) {
     return this.paiementRepo.findByTransactionId(transaction_id);
   }
