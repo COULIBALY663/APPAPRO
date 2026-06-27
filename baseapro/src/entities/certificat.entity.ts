@@ -15,7 +15,7 @@ export class Certificat {
     @Column()
     telephone!: string;
 
-    @Column({ nullable: true })
+    @Column()
     statut?: string; // Ajouté car utilisé dans votre logique de service
 
     @Column({ nullable: true })

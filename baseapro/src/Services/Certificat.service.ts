@@ -22,7 +22,7 @@ export class CertificatService {
       recto_piece: files?.recto_piece?.[0]?.path || null,
       verso_piece: files?.verso_piece?.[0]?.path || null,
       acte_individuel: files?.acte_individuel?.[0]?.path || null,
-      situationmatrimoniale: body.situationmatrimoniale || 'Célibataire',
+      situationmatrimoniale: body.situationmatrimoniale ,
       nomconjoint: body.nomconjoint || null,
     };
 
