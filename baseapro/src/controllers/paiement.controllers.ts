@@ -36,9 +36,21 @@ export class PaiementController {
   @HttpCode(HttpStatus.OK)
   async notify(@Body() body: any) {
     console.log("📥 Signal Webhook reçu dans le contrôleur !");
-    await this.paiementService.notify(body);
-    return { status: "success", message: "Notification traitée" };
-  }
+    
+    // Décodage du format PayDunya
+    let payload = body;
+    if (body && typeof body.data === 'string') {
+        try {
+            payload = JSON.parse(body.data);
+            console.log("✅ JSON décodé avec succès");
+        } catch (e) {
+            console.error("❌ Erreur de décodage JSON :", e);
+        }
+    }
+
+      await this.paiementService.notify(payload);
+      return { status: "success", message: "Notification traitée" };
+    }
 
   // =========================================================================
   // 3. GET ALL PAIEMENTS (🔥 Nouvelle route indispensable pour ton React)

@@ -99,56 +99,44 @@ export class PaiementService {
   // =========================================================================
   // 2. NOTIFY (Webhook de mise à jour automatique du statut)
   // =========================================================================
-  async notify(data: any) {
-    console.log("==================================================");
-    console.log("📥 [WEBHOOK PAYDUNYA] NOTIFICATION REÇUE !");
-    console.log("==================================================");
+ async notify(data: any) {
+  console.log("📥 [WEBHOOK] Données brutes reçues :", JSON.stringify(data));
 
-    const token = data?.token || 
-                  data?.invoice_token || 
-                  data?.invoice?.token || 
-                  data?.data?.invoice?.token;
+  // Extraction flexible : PayDunya envoie souvent un objet 'invoice'
+  const invoice = data.invoice || data;
+  const token = invoice?.token;
+  const rawStatus = invoice?.status;
 
-    if (!token) {
-      console.error("❌ Échec de la notification : Aucun token trouvé.");
-      throw new Error("Token manquant");
-    }
-
-    const paiement = await this.paiementRepo.findByPaydunyaToken(token);
-    if (!paiement) {
-      console.error(`❌ Aucun paiement trouvé pour le token : ${token}`);
-      throw new Error("Paiement introuvable en base");
-    }
-
-    const rawStatus = data?.data?.status || 
-                      data?.status || 
-                      data?.invoice?.status || 
-                      data?.data?.invoice?.status || 
-                      "";
-    
-    const status = String(rawStatus).toLowerCase().trim();
-    let statut: "pending" | "processing" | "paid" | "failed" | "cancelled" = "pending";
-
-    if (["completed", "success", "paid", "reussi"].includes(status)) {
-      statut = "paid";
-    } else if (["failed", "fail", "echoue"].includes(status)) {
-      statut = "failed";
-    } else if (["cancelled", "cancel", "annule"].includes(status)) {
-      statut = "cancelled";
-    } else {
-      statut = "processing";
-    }
-
-    await this.paiementRepo.updateStatut(
-      paiement.transaction_id,
-      statut,
-      token,
-      paiement.payment_url,
-      JSON.stringify(data)
-    );
-    console.log(`✅ Table Paiement mise à jour ! [${paiement.transaction_id}] -> ${statut.toUpperCase()}`);
+  if (!token) {
+    console.error("❌ Notification ignorée : Pas de token trouvé.");
+    return;
   }
 
+  const paiement = await this.paiementRepo.findByPaydunyaToken(token);
+  if (!paiement) {
+    console.error(`❌ Paiement introuvable pour le token : ${token}`);
+    return;
+  }
+
+  // Normalisation du statut
+  // PayDunya utilise "completed" pour un paiement réussi
+  let statut = "processing";
+  if (rawStatus === "completed") {
+    statut = "paid";
+  } else if (["failed", "cancelled"].includes(rawStatus)) {
+    statut = rawStatus;
+  }
+
+  await this.paiementRepo.updateStatut(
+    paiement.transaction_id,
+    statut,
+    token,
+    paiement.payment_url,
+    JSON.stringify(data)
+  );
+  
+  console.log(`✅ Base de données mise à jour : ${paiement.transaction_id} -> ${statut}`);
+}
   // =========================================================================
   // 3. FIND ALL (🔥 Nouvelle méthode appelée par le contrôleur)
   // =========================================================================
