@@ -14,8 +14,7 @@ import {
 
 import { ApiTags, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { memoryStorage } from 'multer'; // Importez uniquement memoryStorage
 
 import { CERTIFICAT_REPOSITORY } from '../repository/Certificat.repository';
 import type { ICertificatRepository } from '../repository/Certificat.repository';
@@ -32,7 +31,7 @@ export class CertificatController {
     private readonly certificatRepository: ICertificatRepository,
   ) {}
 
-  // ➕ CREATE AVEC IMAGES
+  // ➕ CREATE AVEC IMAGES (Cloudinary/Supabase prêt)
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -44,30 +43,11 @@ export class CertificatController {
         { name: "verso_piece", maxCount: 1 },
         { name: "acte_individuel", maxCount: 1 },
       ],
-      {
-        storage: diskStorage({
-          destination: join(process.cwd(), 'uploads'),
-          filename: (req, file, callback) => {
-            const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            callback(null, uniqueName + extname(file.originalname));
-          },
-        }),
-      },
+      { storage: memoryStorage() }, // Plus de diskStorage ici
     ),
   )
-  @ApiBody({ type: CreateCertificatDto })
-  @ApiResponse({ status: 201, description: 'Certificat créé', type: certificat })
-  async createCertificat(
-    @Body() body: any,
-    @UploadedFiles() files: any,
-  ) {
+  async createCertificat(@Body() body: any, @UploadedFiles() files: any) {
     return this.certificatRepository.createCertificat(body, files);
-  }
-
-  // 📄 GET ALL
-  @Get()
-  async getAll() {
-    return this.certificatRepository.getAllCertificats();
   }
 
   // 🔍 GET BY ID
@@ -89,7 +69,8 @@ export class CertificatController {
     return this.certificatRepository.updateStatutDossier(certificat_id, statut);
   }
 
-  // ✏️ UPDATE COMPLET
+
+  // ✏️ UPDATE COMPLET (Mise à jour vers memoryStorage)
   @Put(':id')
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -101,15 +82,7 @@ export class CertificatController {
         { name: "verso_piece", maxCount: 1 },
         { name: "acte_individuel", maxCount: 1 },
       ],
-      {
-        storage: diskStorage({
-          destination: join(process.cwd(), 'uploads'),
-          filename: (req, file, callback) => {
-            const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            callback(null, uniqueName + extname(file.originalname));
-          },
-        }),
-      },
+      { storage: memoryStorage() }, // Plus de diskStorage ici
     ),
   )
   async updateCertificat(

@@ -3,6 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DeepPartial } from 'typeorm';
 import { Certificat } from '../entities/certificat.entity';
 import { Paiement } from '../entities/paiement.entity';
+// Importez Cloudinary
+import { v2 as cloudinary } from 'cloudinary';
+import { Readable } from 'stream';
 
 @Injectable()
 export class CertificatService {
@@ -11,18 +14,51 @@ export class CertificatService {
     private readonly certificatRepository: Repository<Certificat>,
     @InjectRepository(Paiement)
     private readonly paiementRepository: Repository<Paiement>,
-  ) {}
+  ) {
+    // Configuration Cloudinary
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
+
+  // Méthode privée pour uploader vers Cloudinary
+private async uploadToCloudinary(file: Express.Multer.File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const upload = cloudinary.uploader.upload_stream(
+      { folder: 'certificats' },
+      (error, result) => {
+        if (error) return reject(error);
+        
+        // Utilisation de l'opérateur de chaînage optionnel (?.) 
+        // ou vérification explicite pour satisfaire TypeScript
+        if (result?.secure_url) {
+          resolve(result.secure_url);
+        } else {
+          reject(new Error('Cloudinary n\'a pas retourné d\'URL'));
+        }
+      }
+    );
+    Readable.from(file.buffer).pipe(upload);
+  });
+}
 
   async createCertificat(body: any, files: any): Promise<Certificat> {
+    const fileUrls: any = {};
+
+    // Uploader chaque fichier trouvé vers Cloudinary
+    for (const key in files) {
+      if (files[key] && files[key][0]) {
+        fileUrls[key] = await this.uploadToCloudinary(files[key][0]);
+      }
+    }
+
+    // Sauvegarder les URLs au lieu des chemins locaux
     const donnees: DeepPartial<Certificat> = {
       ...body,
-      extrait: files?.extrait?.[0]?.path || null,
-      parent_recto: files?.parent_recto?.[0]?.path || null,
-      parent_verso: files?.parent_verso?.[0]?.path || null,
-      recto_piece: files?.recto_piece?.[0]?.path || null,
-      verso_piece: files?.verso_piece?.[0]?.path || null,
-      acte_individuel: files?.acte_individuel?.[0]?.path || null,
-      situationmatrimoniale: body.situationmatrimoniale ,
+      ...fileUrls, 
+      situationmatrimoniale: body.situationmatrimoniale,
       nomconjoint: body.nomconjoint || null,
     };
 
@@ -30,6 +66,8 @@ export class CertificatService {
     return await this.certificatRepository.save(nouveau);
   }
 
+  // ... (gardez vos autres méthodes : getAllCertificats, findByCertificatId, etc.)
+  
   async getAllCertificats() {
     const result = await this.certificatRepository.find({
       relations: ['paiement'],
