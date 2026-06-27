@@ -12,8 +12,8 @@ export class Certificat {
     @Column()
     prenom!: string;
 
-    @Column()
-    telephone!: string;
+   @Column({ type: 'varchar', length: 20, nullable: true })
+   telephone!: string;
 
     @Column()
     statut?: string; // Ajouté car utilisé dans votre logique de service
