@@ -10,7 +10,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       // 💡 On ajoute || '' pour garantir à TypeScript qu'une chaîne de cacdractères sera toujours fournie
       clientID: configService.get<string>('GOOGLE_CLIENT_ID') || '',
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') || '',
-      callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || 'https://appapro.onrender.com/login/google/callback',
+      callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || 'https://appapro.onrender.com/users/google/callback',
       scope: ['email', 'profile'],
     });
   }

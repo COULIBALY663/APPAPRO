@@ -45,4 +45,15 @@ export class LoginController {
   async login(@Body() loginDto: CreateLoginDto) {
     return this.loginService.Login(loginDto.email, loginDto.password);
   }
+  @Get('google')
+@UseGuards(AuthGuard('google')) // Nécessite @nestjs/passport
+async googleAuth(@Req() req) {
+  // Le redirect vers Google se fait ici
+}
+
+@Get('google/callback')
+@UseGuards(AuthGuard('google'))
+async googleAuthRedirect(@Req() req, @Res() res) {
+  // Traitez le retour de Google ici
+}
 }
