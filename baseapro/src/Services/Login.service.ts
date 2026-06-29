@@ -26,6 +26,29 @@ export class LoginService {
         const newUser = this.userRepository.create({ ...loginDto, password: hashedPassword });
         return await this.userRepository.save(newUser);
     }
+    /**
+     * Gère la création ou la récupération de l'utilisateur Google
+     * et génère son jeton d'accès.
+     */
+    async validateGoogleUser(googleUser: { email: string; prenom: string; nom: string }) {
+        // 1. Chercher si l'utilisateur existe déjà
+        let user = await this.userRepository.findOne({ where: { email: googleUser.email } });
+
+        // 2. Si l'utilisateur n'existe pas, on le crée
+        if (!user) {
+            const newUser = this.userRepository.create({
+                email: googleUser.email,
+                nom: googleUser.nom,
+                prenom: googleUser.prenom,
+                password: 'google-login-placeholder', // Mot de passe fictif
+                role: 'user' // Rôle par défaut
+            });
+            user = await this.userRepository.save(newUser);
+        }
+
+        // 3. Générer le jeton JWT
+        return this.validateAndGenerateToken(user);
+    }
 
     async Login(email: string, pass: string) {
         const user = await this.userRepository.findOne({ where: { email } });

@@ -54,6 +54,8 @@ async googleAuth(@Req() req) {
 @Get('google/callback')
 @UseGuards(AuthGuard('google'))
 async googleAuthRedirect(@Req() req, @Res() res) {
-  // Traitez le retour de Google ici
-}
+  // Redirigez l'utilisateur vers votre frontend après succès
+    const token = req.user.access_token;
+    res.redirect(`https://apro-client.onrender.com/dashboard?token=${token}`);
+  }
 }
