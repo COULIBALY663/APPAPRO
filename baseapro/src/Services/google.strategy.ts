@@ -2,12 +2,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { LoginService } from './Login.service'; // Assurez-vous du bon chemin
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private loginService: LoginService // Injection du service
+  ) {
     super({
-      // 💡 On ajoute || '' pour garantir à TypeScript qu'une chaîne de cacdractères sera toujours fournie
       clientID: configService.get<string>('GOOGLE_CLIENT_ID') || '',
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') || '',
       callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || 'https://appapro.onrender.com/login/google/callback',
@@ -17,11 +20,16 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
     const { name, emails } = profile;
-    const user = {
+    const userPayload = {
       email: emails[0].value,
       prenom: name.givenName,
       nom: name.familyName,
     };
-    done(null, user);
+    
+    // Le service va soit trouver, soit créer l'utilisateur et renvoyer le JWT
+    const result = await this.loginService.validateGoogleUser(userPayload);
+    
+    // done(null, result) passe l'objet { access_token: "..." } au contrôleur
+    done(null, result);
   }
 }
