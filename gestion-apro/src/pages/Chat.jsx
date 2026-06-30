@@ -1,57 +1,54 @@
 import React, { useState } from "react";
-
-import ConversationList from "../components/Chat/ConversationList";
-import MessageBox from "../components/Chat/MessageBox";
-import MessageInput from "../components/Chat/MessageInput";
+import axios from "axios";
+import { useChat } from "../hooks/useChat";
 
 export default function Chat() {
-  const currentUser = 1;
+  const [selected, setSelected] = useState(null); // { phone: "12345", name: "Jean" }
+  const { messages, setMessages } = useChat(selected?.phone);
+  const [inputText, setInputText] = useState("");
 
-  const [selectedConversation, setSelectedConversation] = useState(null);
-
-  const [conversations] = useState([
-    { id: 1, name: "Jean" },
-    { id: 2, name: "Marie" },
-  ]);
-
-  const [messages, setMessages] = useState([
-    { id: 1, senderId: 1, content: "Bonjour" },
-    { id: 2, senderId: 2, content: "Salut !" },
-  ]);
-
-  const handleSendMessage = (text) => {
-    const newMessage = {
-      id: Date.now(),
-      senderId: currentUser,
-      content: text,
-    };
-
-    setMessages([...messages, newMessage]);
+  const sendMessage = async () => {
+    if (!inputText.trim()) return;
+    
+    await axios.post('https://appapro.onrender.com/support/send', {
+      to: selected.phone,
+      message: inputText
+    });
+    
+    setMessages([...messages, { sender: 'SUPPORT', content: inputText, createdAt: new Date() }]);
+    setInputText("");
   };
 
   return (
-    <div style={{ display: "flex", height: "80vh" }}>
-      
-      <ConversationList
-        conversations={conversations}
-        selectedConversation={selectedConversation}
-        onSelect={setSelectedConversation}
-      />
+    <div className="chat-container" style={{ display: "flex", height: "90vh" }}>
+      {/* Colonne Gauche : Contacts */}
+      <div style={{ width: "300px", borderRight: "1px solid #ccc" }}>
+        <h2>Conversations</h2>
+        <button onClick={() => setSelected({ phone: "2250700000000", name: "Client Test" })}>
+          Client Test
+        </button>
+      </div>
 
-      <div style={{ flex: 1, padding: "15px" }}>
-        {selectedConversation ? (
+      {/* Colonne Droite : Messages */}
+      <div style={{ flex: 1, padding: "20px", display: "flex", flexDirection: "column" }}>
+        {selected ? (
           <>
-            <h3>Discussion avec {selectedConversation.name}</h3>
-
-            <MessageBox
-              messages={messages}
-              currentUser={currentUser}
-            />
-
-            <MessageInput onSend={handleSendMessage} />
+            <div style={{ flex: 1, overflowY: "auto" }}>
+              {messages.map((m, i) => (
+                <div key={i} style={{ textAlign: m.sender === 'SUPPORT' ? 'right' : 'left', margin: "10px" }}>
+                  <span style={{ background: m.sender === 'SUPPORT' ? '#dcf8c6' : '#eee', padding: "8px", borderRadius: "10px" }}>
+                    {m.content}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", marginTop: "10px" }}>
+              <input value={inputText} onChange={(e) => setInputText(e.target.value)} style={{ flex: 1 }} />
+              <button onClick={sendMessage}>Envoyer</button>
+            </div>
           </>
         ) : (
-          <p>Sélectionnez une conversation</p>
+          <p>Sélectionnez une conversation pour commencer.</p>
         )}
       </div>
     </div>
