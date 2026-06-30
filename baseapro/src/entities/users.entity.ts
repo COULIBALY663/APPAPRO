@@ -17,7 +17,7 @@ export class Users {
   @Column({ unique: true })
   email!: string;
 
-  @Column()
+  @Column({ nullable: true })
   password!: string;
 
   // 🚀 CES LIGNES CORRIGENT LES ERREURS TS2339
