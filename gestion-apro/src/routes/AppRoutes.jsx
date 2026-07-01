@@ -49,9 +49,6 @@ export default function AppRoutes() {
           <PrivateRoute><Documents /></PrivateRoute>
         } />
 
-        <Route path="/chat" element={
-          <PrivateRoute><Chat /></PrivateRoute>
-        } />
 
         <Route path="/marche" element={
           <PrivateRoute><Marche /></PrivateRoute>
