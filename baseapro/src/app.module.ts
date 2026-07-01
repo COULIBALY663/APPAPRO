@@ -31,10 +31,12 @@ import { CertificatService } from './Services/Certificat.service';
 import { PaiementController } from './controllers/paiement.controllers';
 import { PaiementRepository } from './repository/paiement.repository';
 import { PaiementService } from './Services/paiement.service';
+import { AppController } from './app.controller';
 
 // === SUPPORT (WhatsApp) ===
 import { SupportController } from './controllers/support.controllers';
 import { SupportService } from './Services/message.service';
+import { NotificationGateway } from './notification.gateway';
 
 @Module({
   imports: [
@@ -57,6 +59,7 @@ import { SupportService } from './Services/message.service';
   ],
 
   controllers: [
+    AppController,
     UsersController,
     CasierController,
     CertificatController,
@@ -74,6 +77,7 @@ import { SupportService } from './Services/message.service';
     SupportService, // ✅ Service ajouté
     PaiementRepository,
     GoogleStrategy,
+    NotificationGateway, // ✅ Gateway ajoutée
 
     // Déclaration des interfaces (alias)
     { provide: IUsersRepository, useClass: UsersServices },

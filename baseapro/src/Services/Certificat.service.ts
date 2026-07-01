@@ -6,15 +6,19 @@ import { Paiement } from '../entities/paiement.entity';
 // Importez Cloudinary
 import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'stream';
+import { NotificationGateway } from '../notification.gateway';
 
 @Injectable()
 export class CertificatService {
-  constructor(
+ constructor(
     @InjectRepository(Certificat)
     private readonly certificatRepository: Repository<Certificat>,
+
     @InjectRepository(Paiement)
     private readonly paiementRepository: Repository<Paiement>,
-  ) {
+
+    private readonly notificationGateway: NotificationGateway,
+) {
     // Configuration Cloudinary
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -63,7 +67,13 @@ private async uploadToCloudinary(file: Express.Multer.File): Promise<string> {
     };
 
     const nouveau = this.certificatRepository.create(donnees);
-    return await this.certificatRepository.save(nouveau);
+
+const certificat = await this.certificatRepository.save(nouveau);
+
+// Envoie à tous les dashboards connectés
+this.notificationGateway.envoyerNouvelleDemande(certificat);
+
+return certificat;
   }
 
   // ... (gardez vos autres méthodes : getAllCertificats, findByCertificatId, etc.)

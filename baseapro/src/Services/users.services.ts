@@ -69,4 +69,5 @@ export class UsersServices implements IUsersRepository {
     const result = await this.usersRepository.delete(users_id);
     return (result.affected ?? 0) > 0;
   }
+  
 }
