@@ -5,7 +5,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Profile from "../pages/Profile";
 import Documents from "../pages/Documents";
-import Chat from "../pages/Chat";
+
 import Marche from "../pages/Marche";
 
 import EService from "../pages/EService";
