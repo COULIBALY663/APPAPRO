@@ -4,9 +4,11 @@ import { registerUser } from "../services/userService.js";
 import UsersTab from "../components/UsersTab";
 import CertificatsTab from "../components/CertificatsTab";
 import PaiementsTab from "../components/PaiementsTab";
+import { io } from "socket.io-client";
 
 // 🌐 URL dynamique : utilise la variable d'environnement ou le local par défaut
 const API_URL = import.meta.env.VITE_API_URL || "https://appapro.onrender.com";
+const socket = io(API_URL);
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!sessionStorage.getItem("adminToken"));
@@ -26,6 +28,30 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
   }, [activeTab]);
+  useEffect(() => {
+  if (!isAuthenticated) return;
+
+  Notification.requestPermission();
+
+  socket.on("nouvelle-demande", () => {
+    fetchUsers();
+    fetchCertificats();
+    fetchPaiements();
+
+    if (Notification.permission === "granted") {
+      new Notification("📢 Nouvelle demande", {
+        body: "Un nouvel utilisateur vient d'envoyer un dossier."
+      });
+    }
+
+    const audio = new Audio("/notification.mp3");
+    audio.play();
+  });
+
+  return () => {
+    socket.off("nouvelle-demande");
+  };
+}, [isAuthenticated]);
 
   // ================= UTILS =================
   const getPaymentBadgeStyle = (statut) => {

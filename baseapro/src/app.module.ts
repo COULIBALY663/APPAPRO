@@ -33,7 +33,7 @@ import { PaiementRepository } from './repository/paiement.repository';
 import { PaiementService } from './Services/paiement.service';
 
 // === SUPPORT (WhatsApp) ===
-import { SupportController } from './controllers/message.controllers';
+import { SupportController } from './controllers/support.controllers';
 import { SupportService } from './Services/message.service';
 
 @Module({

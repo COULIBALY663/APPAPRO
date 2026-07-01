@@ -1,32 +1,25 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export const useChat = (apiBase) => {
+export const useChat = (selectedPhone) => {
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  const fetchHistory = useCallback(async (conversationId) => {
-    setLoading(true);
+  const fetchMessages = async () => {
+    if (!selectedPhone) return;
     try {
-      const { data } = await axios.get(`${apiBase}/support/messages/${conversationId}`);
-      setMessages(data);
+      const res = await axios.get(`https://appapro.onrender.com/support/messages/${selectedPhone}`);
+      setMessages(res.data);
     } catch (err) {
-      console.error("Erreur de récupération:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [apiBase]);
-
-  const sendMessage = async (conversationId, content) => {
-    const tempMsg = { id: Date.now(), sender: 'SUPPORT', content, createdAt: new Date() };
-    setMessages(prev => [...prev, tempMsg]);
-    
-    try {
-      await axios.post(`${apiBase}/support/send`, { conversationId, content });
-    } catch (err) {
-      // Logique de rollback si échec
+      console.error("Erreur chargement messages", err);
     }
   };
 
-  return { messages, fetchHistory, sendMessage, loading };
+  useEffect(() => {
+    fetchMessages();
+    // Rafraîchissement automatique toutes les 5 secondes
+    const interval = setInterval(fetchMessages, 5000);
+    return () => clearInterval(interval);
+  }, [selectedPhone]);
+
+  return { messages, setMessages };
 };
