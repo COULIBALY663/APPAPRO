@@ -37,6 +37,7 @@ import { AppController } from './app.controller';
 import { SupportController } from './controllers/support.controllers';
 import { SupportService } from './Services/message.service';
 import { NotificationGateway } from './notification.gateway';
+import { PushSubscription } from './entities/push-subscription.entity';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { NotificationGateway } from './notification.gateway';
       Certificat,
       Casier,
       Message, // ✅ Entité ajoutée
+      PushSubscription,
     ]),
   ],
 
