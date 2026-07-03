@@ -31,7 +31,37 @@ export default function Dashboard() {
   useEffect(() => {
   if (!isAuthenticated) return;
 
-  Notification.requestPermission();
+  const initNotifications = async () => {
+    if (!("Notification" in window)) {
+      alert("Votre navigateur ne supporte pas les notifications.");
+      return;
+    }
+
+    // Si l'utilisateur n'a jamais répondu
+    if (Notification.permission === "default") {
+      const permission = await Notification.requestPermission();
+
+      if (permission !== "granted") {
+        alert("Les notifications sont obligatoires pour utiliser ce tableau de bord.");
+        sessionStorage.removeItem("adminToken");
+        window.location.reload();
+        return;
+      }
+    }
+
+    // Si elles sont refusées
+    if (Notification.permission === "denied") {
+      alert("Veuillez autoriser les notifications dans les paramètres du navigateur.");
+      sessionStorage.removeItem("adminToken");
+      window.location.reload();
+      return;
+    }
+
+    // Si elles sont autorisées
+    activerNotifications();
+  };
+
+  initNotifications();
 
   socket.on("nouvelle-demande", () => {
     fetchUsers();
@@ -40,12 +70,12 @@ export default function Dashboard() {
 
     if (Notification.permission === "granted") {
       new Notification("📢 Nouvelle demande", {
-        body: "Un nouvel utilisateur vient d'envoyer un dossier."
+        body: "Un nouvel utilisateur vient d'envoyer un dossier.",
+        icon: "/logo.png",
       });
     }
 
-    const audio = new Audio("/notification.mp3");
-    audio.play();
+    new Audio("/notification.mp3").play();
   });
 
   return () => {
@@ -175,26 +205,51 @@ export default function Dashboard() {
 }
 }
   }
-  const PUBLIC_VAPID_KEY ="BOr-NIMyQGxFDTuSXoP6XOldQD702RuUuSYsNjQBRTF7d8k37qPOUjE1E1soJ_A3XgU8d9bUpOsHK9E27mGxV2c";
+  const PUBLIC_VAPID_KEY =
+  "BOr-NIMyQGxFDTuSXoP6XOldQD702RuUuSYsNjQBRTF7d8k37qPOUjE1E1soJ_A3XgU8d9bUpOsHK9E27mGxV2c";
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
 
 async function activerNotifications() {
-  // 1. Enregistrer le Service Worker
-  const register = await navigator.serviceWorker.register('/sw.js');
+  try {
+    const registration = await navigator.serviceWorker.register("/sw.js");
 
-  // 2. S'abonner aux notifications
-  const subscription = await register.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: PUBLIC_VAPID_KEY,
-  });
+    let subscription = await registration.pushManager.getSubscription();
 
-  // 3. Envoyer cet objet 'subscription' à votre backend
-  await fetch('https://pageadminapro.onrender.com/push/subscribe', {
-    method: 'POST',
-    body: JSON.stringify(subscription),
-    headers: { 'Content-Type': 'application/json' },
-  });
+    if (!subscription) {
+      subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
+      });
+    }
+
+    await fetch(`${API_URL}/push/subscribe`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(subscription),
+    });
+
+    console.log("Notifications activées");
+  } catch (err) {
+    console.error(err);
+  }
 }
-      
   const handleLogout = () => { sessionStorage.removeItem("adminToken"); window.location.reload(); };
 
   // ================= RENDER =================
@@ -245,13 +300,6 @@ async function activerNotifications() {
       <div style={{ flex: 1, padding: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h1 style={{ color: "#0d47a1" }}>TABLEAU DE BORD</h1>
-          // Dans le bloc de rendu du Dashboard, à côté du bouton Déconnexion :
-    <button 
-     onClick={activerNotifications} 
-    style={{ background: "#28a745", color: "white", padding: "8px 16px", border: "none", cursor: "pointer", marginRight: "10px" }}
-     >
-  🔔 Activer les notifications
-</button>
 
           <button onClick={handleLogout} style={{ background: "#6c757d", color: "white", padding: "8px 16px", border: "none", cursor: "pointer" }}>🚪 Déconnexion</button>
 
