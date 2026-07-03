@@ -106,4 +106,10 @@ export class CertificatController {
     if (isNaN(certificat_id)) throw new BadRequestException('Invalid certificat_id');
     return this.certificatRepository.deleteCertificat(certificat_id);
   }
+  // Dans n'importe quel contrôleur
+@Get('test-notif')
+testNotification() {
+  this.notificationGateway.envoyerNouvelleDemande({ id: 999, message: "Test manuel" });
+  return { status: "Notification envoyée" };
+}
 }
