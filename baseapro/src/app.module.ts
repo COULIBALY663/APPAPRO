@@ -38,6 +38,7 @@ import { SupportController } from './controllers/support.controllers';
 import { SupportService } from './Services/message.service';
 import { NotificationGateway } from './notification.gateway';
 import { PushSubscription } from './entities/push-subscription.entity';
+import { PushController } from './controllers/push.controller';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { PushSubscription } from './entities/push-subscription.entity';
     PaiementController,
     LoginController,
     SupportController, // ✅ Contrôleur ajouté
+    PushController, // ✅ Contrôleur ajouté
   ],
 
   providers: [
