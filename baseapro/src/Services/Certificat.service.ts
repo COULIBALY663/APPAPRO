@@ -7,6 +7,15 @@ import { Paiement } from '../entities/paiement.entity';
 import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'stream';
 import { NotificationGateway } from '../notification.gateway';
+import * as webpush from 'web-push';
+import { PushSubscription } from '../entities/push-subscription.entity';
+
+// Configuration de web-push
+webpush.setVapidDetails(
+  'mailto:ziec2061@gmail.com',
+  process.env.WEBPUSH_PUBLIC_KEY,
+  process.env.WEBPUSH_PRIVATE_KEY
+);
 
 @Injectable()
 export class CertificatService {
@@ -16,6 +25,8 @@ export class CertificatService {
 
     @InjectRepository(Paiement)
     private readonly paiementRepository: Repository<Paiement>,
+    @InjectRepository(PushSubscription)
+    private readonly pushRepository: Repository<PushSubscription>,
 
     private readonly notificationGateway: NotificationGateway,
 ) {
@@ -49,32 +60,38 @@ private async uploadToCloudinary(file: Express.Multer.File): Promise<string> {
 }
 
   async createCertificat(body: any, files: any): Promise<Certificat> {
-    const fileUrls: any = {};
-
-    // Uploader chaque fichier trouvé vers Cloudinary
-    for (const key in files) {
-      if (files[key] && files[key][0]) {
-        fileUrls[key] = await this.uploadToCloudinary(files[key][0]);
-      }
+  // 1. Upload fichiers
+  const fileUrls: any = {};
+  for (const key in files) {
+    if (files[key] && files[key][0]) {
+      fileUrls[key] = await this.uploadToCloudinary(files[key][0]);
     }
-
-    // Sauvegarder les URLs au lieu des chemins locaux
-    const donnees: DeepPartial<Certificat> = {
-      ...body,
-      ...fileUrls, 
-      situationmatrimoniale: body.situationmatrimoniale,
-      nomconjoint: body.nomconjoint || null,
-    };
-
-    const nouveau = this.certificatRepository.create(donnees);
-
-const certificat = await this.certificatRepository.save(nouveau);
-
-// Envoie à tous les dashboards connectés
-this.notificationGateway.envoyerNouvelleDemande(certificat);
-
-return certificat;
   }
+
+  // 2. Création et sauvegarde
+ const certificat = await this.certificatRepository.save({
+  ...body,
+  ...fileUrls,
+});
+  // 3. Notification WebSocket (Temps réel quand dashboard ouvert)
+  this.notificationGateway.envoyerNouvelleDemande(certificat);
+
+  // 4. Notification Push (Quand dashboard fermé)
+  const subscriptions = await this.pushRepository.find();
+  const payload = JSON.stringify({
+    title: "📢 Nouvelle demande",
+    body: `Dossier #${certificat.id} reçu.`,
+  });
+
+  subscriptions.forEach(sub => {
+    webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys as any }, payload)
+      .catch(err => {
+        if (err.statusCode === 410) this.pushRepository.delete(sub.id);
+      });
+  });
+
+  return certificat;
+}
 
   // ... (gardez vos autres méthodes : getAllCertificats, findByCertificatId, etc.)
   
