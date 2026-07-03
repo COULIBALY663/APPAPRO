@@ -10,33 +10,35 @@ import { NotificationGateway } from '../notification.gateway';
 import * as webpush from 'web-push';
 import { PushSubscription } from '../entities/push-subscription.entity';
 
-// Configuration de web-push
-webpush.setVapidDetails(
-  'mailto:ziec2061@gmail.com',
-  process.env.WEBPUSH_PUBLIC_KEY,
-  process.env.WEBPUSH_PRIVATE_KEY
-);
-
 @Injectable()
 export class CertificatService {
- constructor(
+  constructor(
     @InjectRepository(Certificat)
     private readonly certificatRepository: Repository<Certificat>,
 
     @InjectRepository(Paiement)
     private readonly paiementRepository: Repository<Paiement>,
+
     @InjectRepository(PushSubscription)
     private readonly pushRepository: Repository<PushSubscription>,
 
     private readonly notificationGateway: NotificationGateway,
-) {
-    // Configuration Cloudinary
+  ) {
+    // 1. Initialisation VAPID ici (dans le constructeur)
+    webpush.setVapidDetails(
+      'mailto:ziec2061@gmail.com',
+      process.env.VAPID_PUBLIC_KEY, // Correction du nom de variable
+      process.env.VAPID_PRIVATE_KEY  // Correction du nom de variable
+    );
+
+    // 2. Configuration Cloudinary
     cloudinary.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
   }
+  // ... reste du service
 
   // Méthode privée pour uploader vers Cloudinary
 private async uploadToCloudinary(file: Express.Multer.File): Promise<string> {
