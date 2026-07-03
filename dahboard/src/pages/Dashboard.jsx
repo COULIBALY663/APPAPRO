@@ -175,6 +175,25 @@ export default function Dashboard() {
 }
 }
   }
+  const PUBLIC_VAPID_KEY ="BOr-NIMyQGxFDTuSXoP6XOldQD702RuUuSYsNjQBRTF7d8k37qPOUjE1E1soJ_A3XgU8d9bUpOsHK9E27mGxV2c";
+
+async function activerNotifications() {
+  // 1. Enregistrer le Service Worker
+  const register = await navigator.serviceWorker.register('/sw.js');
+
+  // 2. S'abonner aux notifications
+  const subscription = await register.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: PUBLIC_VAPID_KEY,
+  });
+
+  // 3. Envoyer cet objet 'subscription' à votre backend
+  await fetch('https://pageadminapro.onrender.com/push/subscribe', {
+    method: 'POST',
+    body: JSON.stringify(subscription),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
       
   const handleLogout = () => { sessionStorage.removeItem("adminToken"); window.location.reload(); };
 
