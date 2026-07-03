@@ -300,13 +300,6 @@ async function activerNotifications() {
       <div style={{ flex: 1, padding: "20px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h1 style={{ color: "#0d47a1" }}>TABLEAU DE BORD</h1>
-          // Dans le bloc de rendu du Dashboard, à côté du bouton Déconnexion :
-    <button 
-     onClick={activerNotifications} 
-    style={{ background: "#28a745", color: "white", padding: "8px 16px", border: "none", cursor: "pointer", marginRight: "10px" }}
-     >
-      🔔 Activer les notifications
-    </button>
 
           <button onClick={handleLogout} style={{ background: "#6c757d", color: "white", padding: "8px 16px", border: "none", cursor: "pointer" }}>🚪 Déconnexion</button>
 
