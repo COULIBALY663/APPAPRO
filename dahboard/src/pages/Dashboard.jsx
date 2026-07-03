@@ -225,31 +225,23 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function activerNotifications() {
-  try {
-    const registration = await navigator.serviceWorker.register("/sw.js");
-
-    let subscription = await registration.pushManager.getSubscription();
-
-    if (!subscription) {
-      subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
+    try {
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) {
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
+        });
+      }
+      await fetch(`${API_URL}/push/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(subscription),
       });
-    }
-
-    await fetch(`${API_URL}/push/subscribe`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(subscription),
-    });
-
-    console.log("Notifications activées");
-  } catch (err) {
-    console.error(err);
+      console.log("✅ Notifications activées et enregistrées.");
+    } catch (err) { console.error("❌ Erreur Push :", err); }
   }
-}
   const handleLogout = () => { sessionStorage.removeItem("adminToken"); window.location.reload(); };
 
   // ================= RENDER =================
