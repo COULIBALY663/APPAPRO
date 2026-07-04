@@ -206,7 +206,7 @@ export default function Dashboard() {
 }
   }
   const PUBLIC_VAPID_KEY =
-  "BOr-NIMyQGxFDTuSXoP6XOldQD702RuUuSYsNjQBRTF7d8k37qPOUjE1E1soJ_A3XgU8d9bUpOsHK9E27mGxV2c";
+  "BD7OCYa1teLqmg9dFJTEJM2PURSJAE0spjZEYefZPNj_8w-nXDnHl3aO5UvTx9j0p_0-5A9rekXu3xXjI-zaSMU";
 
 function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
