@@ -13,4 +13,5 @@ export class PushSubscription {
 
   @Column({ nullable: true })
   userId!: number;
+
 }
