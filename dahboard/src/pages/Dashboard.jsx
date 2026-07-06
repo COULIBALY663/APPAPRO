@@ -157,6 +157,7 @@ export default function Dashboard() {
     
     return (
       
+      
       <div style={{ display: "flex", minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div style={{ flex: 1, padding: "20px" }}>
@@ -170,6 +171,22 @@ export default function Dashboard() {
           {activeTab === "certificats" && <CertificatsTab certificats={certificats} paiements={paiements} onValiderDossier={handleValiderDossier} onDeleteCertificat={handleDeleteCertificat} getPaymentBadgeStyle={getPaymentBadgeStyle} translatePaymentStatus={translatePaymentStatus} />}
           {activeTab === "paiements" && <PaiementsTab paiements={paiements} getPaymentBadgeStyle={getPaymentBadgeStyle} translatePaymentStatus={translatePaymentStatus} />}
         </div>
+        // Cherchez cette partie dans votre return (vers la fin du fichier) :
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+  <h1 style={{ color: "#0d47a1" }}>TABLEAU DE BORD</h1>
+
+  {/* AJOUTEZ LE BOUTON ICI */}
+  <button 
+    onClick={activerNotifications} 
+    style={{ background: "#28a745", color: "white", padding: "8px 16px", border: "none", cursor: "pointer", marginRight: "10px" }}
+  >
+    🔔 Activer Notifications
+  </button>
+
+  <button onClick={handleLogout} style={{ background: "#6c757d", color: "white", padding: "8px 16px", border: "none", cursor: "pointer" }}>
+    🚪 Déconnexion
+  </button>
+</div>
       </div>
     );
 }
