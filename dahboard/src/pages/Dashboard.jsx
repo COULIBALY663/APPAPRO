@@ -139,6 +139,21 @@ export default function Dashboard() {
         </div>
       );
     }
+    // ================= UTILS =================
+  const getPaymentBadgeStyle = (statut) => {
+    const baseStyle = { padding: "6px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "bold", display: "inline-block", textAlign: "center", border: "none", width: "100%", maxWidth: "160px" };
+    const norm = String(statut || "").toLowerCase().trim();
+    if (["paid", "success", "completed"].includes(norm)) return { ...baseStyle, backgroundColor: "#d4edda", color: "#155724", border: "1px solid #c3e6cb" };
+    if (["processing", "pending"].includes(norm)) return { ...baseStyle, backgroundColor: "#fff3cd", color: "#856404", border: "1px solid #ffeeba" };
+    return { ...baseStyle, backgroundColor: "#f8d7da", color: "#721c24", border: "1px solid #f5c6cb" };
+  };
+
+  const translatePaymentStatus = (statut) => {
+    const norm = String(statut || "").toLowerCase().trim();
+    if (["paid", "success", "completed"].includes(norm)) return "✅ Payé";
+    if (["processing", "pending"].includes(norm)) return "⏳ En cours...";
+    return "🛑 Échoué / Non initié";
+  };
     
     return (
       
