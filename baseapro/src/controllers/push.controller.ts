@@ -11,15 +11,28 @@ export class PushController {
   ) {}
 
   @Post('subscribe')
-  async subscribe(@Body() subscription: any) {
-    // 1. Vérifier si l'abonnement existe déjà pour éviter les doublons
-    const existing = await this.pushRepository.findOne({ 
-        where: { endpoint: subscription.endpoint } 
+async subscribe(@Body() subscription: any) {
+  // 1. Log pour voir ce que vous recevez réellement (TRÈS IMPORTANT)
+  console.log("Données reçues :", JSON.stringify(subscription));
+
+  // 2. Vérifier si l'endpoint existe
+  const existing = await this.pushRepository.findOne({ 
+      where: { endpoint: subscription.endpoint } 
+  });
+  
+  if (!existing) {
+    // 3. Création explicite avec la structure attendue par l'entité
+    const newSubscription = this.pushRepository.create({
+      endpoint: subscription.endpoint,
+      keys: {
+        auth: subscription.keys.auth,
+        p256dh: subscription.keys.p256dh
+      }
     });
     
-    if (!existing) {
-      return await this.pushRepository.save(subscription);
-    }
-    return { message: "Déjà abonné" };
+    return await this.pushRepository.save(newSubscription);
   }
+  
+  return { message: "Déjà abonné" };
+}
 }
