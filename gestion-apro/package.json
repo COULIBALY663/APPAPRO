@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://COULIBALY663.github.io/FRONT-USERS",
+  "homepage": "https://COULIBALY663.github.io/APPAPRO",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

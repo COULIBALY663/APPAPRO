@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "/FRONT-USERS/",
+  base: "/APPAPRO/",
 
   plugins: [
     react(),
@@ -20,8 +20,8 @@ export default defineConfig({
         name: "Academy Pro",
         short_name: "Academy Pro",
         description: "Plateforme de gestion académique Academy Pro",
-        start_url: "/FRONT-USERS/",
-        scope: "/FRONT-USERS/",
+        start_url: "/APPAPRO/",
+        scope: "/APPAPRO/",
         display: "standalone",
         orientation: "portrait",
         background_color: "#ffffff",
