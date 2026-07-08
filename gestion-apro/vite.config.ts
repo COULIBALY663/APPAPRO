@@ -3,12 +3,14 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
+  base: "/FRONT-USERS/",
+
   plugins: [
     react(),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
-      filename: "manifest.json", // 👈 Force la création en .json pour TS aussi
+      filename: "manifest.json",
       includeAssets: [
         "favicon.jpeg",
         "icons/icon-192.png",
@@ -18,8 +20,8 @@ export default defineConfig({
         name: "Academy Pro",
         short_name: "Academy Pro",
         description: "Plateforme de gestion académique Academy Pro",
-        start_url: "/",
-        scope: "/",
+        start_url: "/FRONT-USERS/",
+        scope: "/FRONT-USERS/",
         display: "standalone",
         orientation: "portrait",
         background_color: "#ffffff",
@@ -51,6 +53,7 @@ export default defineConfig({
       }
     })
   ],
+
   server: {
     open: true
   }
