@@ -8,8 +8,9 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
+      filename: "manifest.json", // 👈 Force la création en .json pour TS aussi
       includeAssets: [
-        "favicon.icon.jpeg",
+        "favicon.jpeg",
         "icons/icon-192.png",
         "icons/icon-512.png"
       ],
