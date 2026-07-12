@@ -86,7 +86,7 @@ const handleAuthSubmit = async (e) => {
     });
 
     if (loginRes.status === 401) {
-       return alert("Accès refusé : contactez Zie au 0564225178 Pour vous connecté");
+       return alert("Accès refusé : contactez COULIBALY ZIE au 0564225178 Pour vous connecté");
     }
     if (!loginRes.ok) return alert("Email ou mot de passe incorrect.");
     
