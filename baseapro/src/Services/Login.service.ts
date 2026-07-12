@@ -65,13 +65,18 @@ export class LoginService {
   // ==========================
   // CONNEXION CLASSIQUE
   // ==========================
-  async Login(email: string, pass: string) {
+ async Login(email: string, pass: string) {
     const user = await this.userRepository.findOne({
       where: { email },
     });
 
     if (!user) {
       throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    // NOUVELLE RÈGLE : Vérification du rôle admin
+    if (user.role !== 'admin') {
+      throw new UnauthorizedException('Accès refusé : Seuls les administrateurs peuvent se connecter ici.');
     }
 
     const isMatch = await bcrypt.compare(pass, user.password);
