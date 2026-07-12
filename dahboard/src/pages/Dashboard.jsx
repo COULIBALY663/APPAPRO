@@ -78,41 +78,23 @@ export default function Dashboard() {
 
 const handleAuthSubmit = async (e) => {
   e.preventDefault();
+  try {
+    const loginRes = await fetch(`${API_URL}/login/connexion`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: authEmail, password: authPassword }),
+    });
 
-  if (isRegisterMode) {
-    // LOGIQUE D'INSCRIPTION
-    if (authPassword !== authConfirmPassword) return alert("Les mots de passe ne correspondent pas");
+    if (loginRes.status === 401) {
+       return alert("Accès refusé : contactez Zie au 0564225178 Pour vous connecté");
+    }
+    if (!loginRes.ok) return alert("Email ou mot de passe incorrect.");
     
-    try {
-      // Appelez votre service d'inscription (assurez-vous qu'il pointe vers /users/register ou similaire)
-      const res = await registerUser({ 
-        nom: authNom, 
-        prenom: authPrenom, 
-        email: authEmail, 
-        password: authPassword 
-      });
-      alert("Inscription réussie ! Vous pouvez maintenant vous connecter.");
-      setIsRegisterMode(false); // Retour à la connexion
-    } catch (err) {
-      alert("Erreur lors de l'inscription");
-    }
-  } else {
-    // LOGIQUE DE CONNEXION (Votre code actuel)
-    try {
-      const loginRes = await fetch(`${API_URL}/login/connexion`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: authEmail, password: authPassword }),
-      });
-
-      if (!loginRes.ok) return alert("Email ou mot de passe incorrect");
-      
-      const loginData = await loginRes.json();
-      sessionStorage.setItem("adminToken", loginData.access_token);
-      setIsAuthenticated(true);
-    } catch (err) {
-      alert("Erreur de connexion");
-    }
+    const loginData = await loginRes.json();
+    sessionStorage.setItem("adminToken", loginData.access_token);
+    setIsAuthenticated(true);
+  } catch (err) {
+    console.error(err);
   }
 };
 
