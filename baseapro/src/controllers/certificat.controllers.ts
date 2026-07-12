@@ -19,9 +19,6 @@ import { memoryStorage } from 'multer'; // Importez uniquement memoryStorage
 import { CERTIFICAT_REPOSITORY } from '../repository/Certificat.repository';
 import type { ICertificatRepository } from '../repository/Certificat.repository';
 
-import { CreateCertificatDto } from '../Dtos/certificat.dto';
-import { certificat } from '../models/certificat.models';
-
 @ApiTags('Certificat')
 @Controller('certificat')
 export class CertificatController {

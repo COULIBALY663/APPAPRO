@@ -76,8 +76,28 @@ export default function Dashboard() {
   };
 
 
-  const handleAuthSubmit = async (e) => {
-    e.preventDefault();
+const handleAuthSubmit = async (e) => {
+  e.preventDefault();
+
+  if (isRegisterMode) {
+    // LOGIQUE D'INSCRIPTION
+    if (authPassword !== authConfirmPassword) return alert("Les mots de passe ne correspondent pas");
+    
+    try {
+      // Appelez votre service d'inscription (assurez-vous qu'il pointe vers /users/register ou similaire)
+      const res = await registerUser({ 
+        nom: authNom, 
+        prenom: authPrenom, 
+        email: authEmail, 
+        password: authPassword 
+      });
+      alert("Inscription réussie ! Vous pouvez maintenant vous connecter.");
+      setIsRegisterMode(false); // Retour à la connexion
+    } catch (err) {
+      alert("Erreur lors de l'inscription");
+    }
+  } else {
+    // LOGIQUE DE CONNEXION (Votre code actuel)
     try {
       const loginRes = await fetch(`${API_URL}/login/connexion`, {
         method: "POST",
@@ -91,10 +111,10 @@ export default function Dashboard() {
       sessionStorage.setItem("adminToken", loginData.access_token);
       setIsAuthenticated(true);
     } catch (err) {
-      console.error(err);
       alert("Erreur de connexion");
     }
-  };
+  }
+};
 
   const handleLogout = () => { sessionStorage.removeItem("adminToken"); window.location.reload(); };
 
