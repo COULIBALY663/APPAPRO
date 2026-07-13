@@ -11,6 +11,10 @@ export default function Documents() {
     alert("Consulter les listes des formations disponible cliqué !");
   };
 
+  const handleAddDocument2 = () => {
+    alert("Accéder aux services coursiers !");
+  };
+
   return (
     <div
       style={{
@@ -34,9 +38,9 @@ export default function Documents() {
       {/* 🍊 BANNIÈRE TITRE RESPONSIVE */}
       <div
         style={{
-          background: "linear-gradient(135deg, #E67E22 0%, #D35400 100%)",
+          background: "linear-gradient(135deg, #E67E22 0%, #D35400 100%)", // Dégradé plus moderne
           color: "white",
-          padding: "clamp(20px, 4vw, 40px) 20px",
+          padding: "clamp(20px, 4vw, 40px) 20px", // S'adapte sur mobile
           textAlign: "center",
           boxShadow: "0 4px 15px rgba(211, 84, 0, 0.2)",
         }}
@@ -44,7 +48,7 @@ export default function Documents() {
         <h1
           style={{
             margin: 0,
-            fontSize: "clamp(22px, 4vw, 36px)",
+            fontSize: "clamp(22px, 4vw, 36px)", // Ne déborde pas sur petit écran
             fontWeight: "800",
             letterSpacing: "-0.01em",
             textTransform: "uppercase",
@@ -58,6 +62,7 @@ export default function Documents() {
       <div
         style={{
           display: "grid",
+          // S'aligne sur 1 colonne sur mobile, et répartit équitablement jusqu'à 4 sur PC
           gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", 
           gap: "20px",
           padding: "clamp(20px, 5vw, 40px) clamp(15px, 5vw, 40px)",
@@ -83,10 +88,16 @@ export default function Documents() {
           🎓 Consulter les listes des <br /> formations disponibles
         </button>
 
-        {/* 🟣 Bouton 3 : SERVICES COURSIER (Redirection configurée) */}
-       
+        {/* 🟣 Bouton 3 */}
+        <button
+          className="action-btn"
+          onClick={() => navigate("/Coursier")}
+          style={buttonStyle("linear-gradient(135deg, #8b5cf6, #6d28d9)")}
+        >
+          Accéder aux services coursier
+        </button>
 
-        {/* 🟠 Bouton 4 */}
+        {/* 🟠 Bouton 4 (Remplacé par un vrai bouton sémantique) */}
         <button
           className="action-btn"
           onClick={() => navigate("/eservice")}
@@ -107,7 +118,7 @@ const buttonStyle = (gradientBackground) => ({
   color: "white",
   padding: "30px 20px",
   border: "none",
-  borderRadius: "24px",
+  borderRadius: "24px", // Un arrondi à 24px fait beaucoup plus moderne et pro que 40px
   fontSize: "16px",
   fontWeight: "700",
   lineHeight: "1.4",
