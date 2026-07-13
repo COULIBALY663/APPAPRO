@@ -4,7 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Documents from "../pages/Documents";
-import CoursierForm from "../pages/Coursier";
+import CoursierForm from "../pages/Coursier"; // 👈 Assure-toi que ton fichier s'appelle exactement Coursier.jsx dans ton dossier pages !
 
 import Marche from "../pages/Marche";
 
@@ -45,31 +45,32 @@ export default function AppRoutes() {
           <PrivateRoute><Documents /></PrivateRoute>
         } />
 
-
         <Route path="/marche" element={
           <PrivateRoute><Marche /></PrivateRoute>
         } />
 
-        {/* 🔥 NOUVELLES ROUTES */}
+        {/* 🔥 TOUTES LES ROUTES EN MINUSCULES POUR COMPATIBILITÉ LINUX/RENDER */}
         <Route path="/eservice" element={
           <PrivateRoute><EService /></PrivateRoute>
         } />
-         
-        <Route path="/Certificat" element={
+          
+        <Route path="/certificat" element={
           <PrivateRoute><Certificat /></PrivateRoute>
         } />
-        <Route path="/Contact" element={
+
+        <Route path="/contact" element={
           <PrivateRoute><Contact /></PrivateRoute>
         } />
-        <Route path="/Coursier" element={
+
+        <Route path="/coursier" element={
           <PrivateRoute><CoursierForm /></PrivateRoute>
         } />
 
-        <Route path="/Casier" element={
+        <Route path="/casier" element={
           <PrivateRoute><Casier /></PrivateRoute>
         } />
 
-        <Route path="/Timbre" element={
+        <Route path="/timbre" element={
           <PrivateRoute><Timbre /></PrivateRoute>
         } />
 
