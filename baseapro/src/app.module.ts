@@ -10,11 +10,13 @@ import { Casier } from './entities/casier.entity';
 import { Certificat } from './entities/certificat.entity';
 import { Paiement } from './entities/paiement.entity';
 import { Message } from './entities/message.entity';
+import { Coursier } from './entities/coursier.entity';
 
 // === SERVICES & CONTROLLERS ===
 import { UsersServices } from './Services/users.services';
 import { UsersController } from './controllers/users.controllers';
 import { IUsersRepository } from './repository/users.repository';
+import { CoursierController } from './controllers/Coursier.controllers';
 
 import { LoginService } from './Services/Login.service';
 import { LoginController } from './controllers/login.controllers';
@@ -23,6 +25,7 @@ import { GoogleStrategy } from './Services/google.strategy';
 import { CasierController } from './controllers/casier.controllers';
 import { CASIER_REPOSITORY } from './repository/casier.repository';
 import { CasierService } from './Services/casier.service';
+import { CoursierService } from './Services/Coursier.service';
 
 import { CertificatController } from './controllers/certificat.controllers';
 import { CERTIFICAT_REPOSITORY } from './repository/Certificat.repository';
@@ -55,6 +58,7 @@ import { PushController } from './controllers/push.controller';
       Paiement,
       Users,
       Certificat,
+      Coursier,
       Casier,
       Message, // ✅ Entité ajoutée
       PushSubscription,
@@ -69,7 +73,8 @@ import { PushController } from './controllers/push.controller';
     PaiementController,
     LoginController,
     SupportController, // ✅ Contrôleur ajouté
-    PushController, // ✅ Contrôleur ajouté
+    PushController,
+    CoursierController, // ✅ Contrôleur ajouté
   ],
 
   providers: [
@@ -81,6 +86,7 @@ import { PushController } from './controllers/push.controller';
     SupportService, // ✅ Service ajouté
     PaiementRepository,
     GoogleStrategy,
+    CoursierService, // ✅ Service ajouté
     NotificationGateway, // ✅ Gateway ajoutée
 
     // Déclaration des interfaces (alias)

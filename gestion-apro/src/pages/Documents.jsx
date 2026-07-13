@@ -12,7 +12,7 @@ export default function Documents() {
   };
 
   const handleAddDocument2 = () => {
-    alert("Consulter les autres services d'académie pro !");
+    alert("Accéder aux services coursiers !");
   };
 
   return (
@@ -91,10 +91,10 @@ export default function Documents() {
         {/* 🟣 Bouton 3 */}
         <button
           className="action-btn"
-          onClick={handleAddDocument2}
+          onClick={() => navigate("/coursier")}
           style={buttonStyle("linear-gradient(135deg, #8b5cf6, #6d28d9)")}
         >
-          🚀 Consulter les autres <br /> services d'académie pro
+          Accéder aux services coursier
         </button>
 
         {/* 🟠 Bouton 4 (Remplacé par un vrai bouton sémantique) */}

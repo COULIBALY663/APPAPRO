@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from "typeorm";
+import { Coursier } from "./coursier.entity";
 
 @Entity()
 export class Paiement {
@@ -67,4 +69,7 @@ export class Paiement {
 
   @UpdateDateColumn()
   updated_at!: Date;
+  
+  @OneToOne(() => Coursier, (coursier) => coursier.paiement)
+  coursier!: Coursier;
 }

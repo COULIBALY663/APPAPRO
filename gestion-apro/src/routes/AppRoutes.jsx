@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import Profile from "../pages/Profile";
+import coursier from "../pages/Coursier";
 import Documents from "../pages/Documents";
 
 import Marche from "../pages/Marche";
@@ -41,10 +41,6 @@ export default function AppRoutes() {
       {/* Pages privées */}
       <Route element={<MainLayout />}>
 
-        <Route path="/profile" element={
-          <PrivateRoute><Profile /></PrivateRoute>
-        } />
-
         <Route path="/documents" element={
           <PrivateRoute><Documents /></PrivateRoute>
         } />
@@ -64,6 +60,9 @@ export default function AppRoutes() {
         } />
         <Route path="/Contact" element={
           <PrivateRoute><Contact /></PrivateRoute>
+        } />
+        <Route path="/coursier" element={
+          <PrivateRoute><coursier /></PrivateRoute>
         } />
 
         <Route path="/Casier" element={
