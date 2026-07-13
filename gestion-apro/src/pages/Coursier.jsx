@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const CoursierForm = ({ paiementId }) => {
+export default function CoursierForm() {
+  const navigate = useNavigate();
+
+  const [step, setStep] = useState("form"); 
+  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState({});
+
   const [formData, setFormData] = useState({
-    IP: '',
-    FILIERE: '',
-    nom: '',
-    date_nais: '',
-    Lieu_nais: '',
-    telephone: ''
+    IP: "",
+    FILIERE: "",
+    nom: "",
+    date_nais: "",
+    Lieu_nais: "",
+    telephone: ""
   });
 
   const [files, setFiles] = useState({
@@ -16,78 +22,230 @@ const CoursierForm = ({ paiementId }) => {
     verso_piece: null
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleFileChange = (e) => {
-    const { name, files: inputFiles } = e.target;
-    // Validation : Limite de taille de 2 Mo
-    if (inputFiles[0] && inputFiles[0].size > 2 * 1024 * 1024) {
-      alert("Le fichier est trop volumineux (max 2MB)");
+    const file = e.target.files[0];
+    const name = e.target.name;
+
+    if (file && file.size > 2 * 1024 * 1024) {
+      alert("Le fichier est trop volumineux (max 2 Mo)");
       return;
     }
-    setFiles({ ...files, [name]: inputFiles[0] });
+
+    setFiles((prev) => ({ ...prev, [name]: file }));
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreview((prev) => ({ ...prev, [name]: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-
-    const data = new FormData();
-    Object.keys(formData).forEach(key => data.append(key, formData[key]));
-    
-    if (files.recto_piece) data.append('recto_piece', files.recto_piece);
-    if (files.verso_piece) data.append('verso_piece', files.verso_piece);
 
     try {
-      await axios.post(`https://appapro.onrender.com/coursier/${paiementId}`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      const data = new FormData();
+      Object.keys(formData).forEach((key) => data.append(key, formData[key]));
+      if (files.recto_piece) data.append("recto_piece", files.recto_piece);
+      if (files.verso_piece) data.append("verso_piece", files.verso_piece);
+
+      const res = await fetch("https://appapro.onrender.com/coursier", {
+        method: "POST",
+        body: data,
       });
-      alert('Coursier créé avec succès !');
-      // Réinitialiser le formulaire
-      setFormData({ IP: '', FILIERE: '', nom: '', date_nais: '', Lieu_nais: '', telephone: '' });
-      setFiles({ recto_piece: null, verso_piece: null });
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Erreur lors de la soumission du dossier');
+
+      if (!res.ok) throw new Error("Erreur lors de la pré-inscription");
+      const coursierData = await res.json();
+      const coursierId = coursierData?.id || coursierData?.IDENTIFIANT || coursierData?.id_coursier;
+
+      const payRes = await fetch("https://appapro.onrender.com/paiement/init", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          telephone: formData.telephone,
+          montant: 200,
+          type_service: "coursier",
+          coursier_id: coursierId,
+        }),
+      });
+
+      if (!payRes.ok) throw new Error("Erreur initialisation paiement");
+      const paymentData = await payRes.json();
+
+      if (paymentData?.payment_url) {
+        localStorage.setItem("pending_coursier_payment_success", "true");
+        window.location.href = paymentData.payment_url;
+      } else {
+        throw new Error("L'URL de paiement n'a pas été générée");
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("❌ Une erreur est survenue lors du traitement de votre dossier.");
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    const isSuccess = localStorage.getItem("pending_coursier_payment_success");
+    if (isSuccess === "true") {
+      localStorage.removeItem("pending_coursier_payment_success");
+      setStep("success");
+    }
+  }, []);
+
+  // ÉCRAN DE SUCCÈS
+  if (step === "success") {
+    return (
+      <div style={{ width: '100%', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', fontFamily: 'sans-serif', padding: '20px' }}>
+        <div style={{ width: '100%', maxWidth: '500px', backgroundColor: '#ffffff', padding: '40px', borderRadius: '16px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', border: '1px solid #f1f5f9', textAlign: 'center' }}>
+          <div style={{ width: '64px', height: '64px', backgroundColor: '#d1fae5', color: '#059669', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px', margin: '0 auto 20px auto' }}>🎉</div>
+          <h2 style={{ fontSize: '22px', fontWeight: '900', color: '#065f46', textTransform: 'uppercase', margin: '0 0 10px 0' }}>Inscription Validée !</h2>
+          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '30px' }}>Votre paiement a été reçu. Votre dossier de coursier est désormais actif.</p>
+          <button onClick={() => navigate("/dashboard")} style={{ padding: '12px 30px', backgroundColor: '#00B652', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', cursor: 'pointer' }}>Aller au Dashboard</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="p-6 bg-white shadow-xl rounded-lg max-w-lg mx-auto border border-gray-100">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Inscription Coursier</h2>
+    <div style={{ width: '100%', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', fontFamily: 'sans-serif', padding: '40px 20px' }}>
       
-      {error && <div className="p-3 mb-4 bg-red-100 text-red-700 rounded text-sm">{error}</div>}
+      {/* Cadre du formulaire */}
+      <div style={{ width: '100%', maxWidth: '750px', backgroundColor: '#ffffff', borderRadius: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+        
+        {/* En-tête Institutionnel ACADEMY PRO */}
+        <div style={{ backgroundColor: '#ED5F07', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', color: '#ffffff', borderBottom: '2px solid #d65203' }}>
+          <span style={{ fontSize: '24px' }}>📄</span>
+          <h1 style={{ fontSize: '28px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0, textAlign: 'center' }}>
+            Inscription au Service Coursier
+          </h1>
+        </div>
 
-      <input name="nom" placeholder="Nom complet" onChange={handleChange} value={formData.nom} className="block w-full mb-4 p-3 border rounded focus:ring-2 focus:ring-blue-500" required />
-      <input name="IP" placeholder="IP" onChange={handleChange} value={formData.IP} className="block w-full mb-4 p-3 border rounded focus:ring-2 focus:ring-blue-500" required />
-      <input name="FILIERE" placeholder="Filière" onChange={handleChange} value={formData.FILIERE} className="block w-full mb-4 p-3 border rounded focus:ring-2 focus:ring-blue-500" required />
-      <input name="date_nais" type="date" onChange={handleChange} value={formData.date_nais} className="block w-full mb-4 p-3 border rounded focus:ring-2 focus:ring-blue-500" required />
-      <input name="Lieu_nais" placeholder="Lieu de naissance" onChange={handleChange} value={formData.Lieu_nais} className="block w-full mb-4 p-3 border rounded focus:ring-2 focus:ring-blue-500" required />
-      <input name="telephone" placeholder="Téléphone" onChange={handleChange} value={formData.telephone} className="block w-full mb-4 p-3 border rounded focus:ring-2 focus:ring-blue-500" />
+        <div style={{ padding: '40px' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '35px' }}>
+            
+            {/* SECTION 1 : RENSEIGNEMENTS */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', color: '#C45500', fontWeight: 'bold', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '40px', textTransform: 'uppercase', letterSpacing: '1px', margin: 0, textAlign: 'center' }}>
+                  Informations Personnelles
+                </h2>
+              </div>
 
-      <label className="block text-sm font-medium text-gray-700 mb-1">Recto pièce :</label>
-      <input name="recto_piece" type="file" onChange={handleFileChange} className="mb-4 block w-full text-sm text-gray-500" />
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Nom complet <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input name="nom" value={formData.nom} onChange={handleChange} required placeholder="Ex : COULIBALY Jean" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none' }} />
+                </div>
 
-      <label className="block text-sm font-medium text-gray-700 mb-1">Verso pièce :</label>
-      <input name="verso_piece" type="file" onChange={handleFileChange} className="mb-6 block w-full text-sm text-gray-500" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Identifiant Permanent (IP) <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input name="IP" value={formData.IP} onChange={handleChange} required placeholder="Identifiant officiel" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none' }} />
+                </div>
 
-      <button 
-        disabled={loading}
-        type="submit" 
-        className={`w-full p-3 text-white rounded font-bold transition-colors ${loading ? 'bg-blue-300' : 'bg-blue-600 hover:bg-blue-700'}`}
-      >
-        {loading ? 'Traitement en cours...' : 'Soumettre le dossier'}
-      </button>
-    </form>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Filière d'étude <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input name="FILIERE" value={formData.FILIERE} onChange={handleChange} required placeholder="Ex : IDA, RIT..." style={{ padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none' }} />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Numéro de téléphone <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input type="tel" name="telephone" value={formData.telephone} onChange={handleChange} required placeholder="Ex: 0700000000" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none' }} />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Date de naissance <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input type="date" name="date_nais" value={formData.date_nais} onChange={handleChange} required style={{ padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none' }} />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Lieu de naissance <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input name="Lieu_nais" value={formData.Lieu_nais} onChange={handleChange} required placeholder="Ville de naissance" style={{ padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 2 : CHARGEMENT DES FICHIERS PRO (STYLE DRAG & DROP) */}
+            <div>
+              <div style={{ backgroundColor: '#D1F7DB', color: '#1E7E34', fontWeight: 'bold', textAlign: 'center', padding: '10px', borderRadius: '8px', fontSize: '25px', textTransform: 'uppercase', letterSpacing: '1px', border: '1px solid #bbf7d0', marginBottom: '20px' }}>
+                 Documents Justificatifs Obligatoires
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+                
+                {/* RECTO PIECE */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Recto de la pièce <span style={{ color: '#ef4444' }}>*</span></span>
+                  <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '24px', backgroundColor: '#f8fafc', cursor: 'pointer', position: 'relative', textAlign: 'center' }}>
+                    <span style={{ fontSize: '24px', marginBottom: '8px' }}>📤</span>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#334155' }}>Choisir le fichier Recto</span>
+                    <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>PDF, PNG, JPG (Max 2Mo)</span>
+                    <input type="file" name="recto_piece" onChange={handleFileChange} required accept=".pdf,.jpg,.jpeg,.png" style={{ display: 'none' }} />
+                    
+                    {preview.recto_piece && (
+                      <div style={{ marginTop: '10px', width: '50px', height: '50px', borderRadius: '6px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                        <img src={preview.recto_piece} alt="Aperçu" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    )}
+                  </label>
+                </div>
+
+                {/* VERSO PIECE */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#475569' }}>Verso de la pièce <span style={{ color: '#ef4444' }}>*</span></span>
+                  <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '24px', backgroundColor: '#f8fafc', cursor: 'pointer', position: 'relative', textAlign: 'center' }}>
+                    <span style={{ fontSize: '24px', marginBottom: '8px' }}>📤</span>
+                    <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#334155' }}>Choisir le fichier Verso</span>
+                    <span style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px' }}>PDF, PNG, JPG (Max 2Mo)</span>
+                    <input type="file" name="verso_piece" onChange={handleFileChange} required accept=".pdf,.jpg,.jpeg,.png" style={{ display: 'none' }} />
+                    
+                    {preview.verso_piece && (
+                      <div style={{ marginTop: '10px', width: '50px', height: '50px', borderRadius: '6px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
+                        <img src={preview.verso_piece} alt="Aperçu" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    )}
+                  </label>
+                </div>
+
+              </div>
+            </div>
+
+            {/* BOUTON DE SOUMISSION VERT FINITIONS PREMIUM */}
+            <div style={{ paddingTop: '20px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                type="submit"
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '14px 35px',
+                  backgroundColor: loading ? '#cbd5e1' : '#00B652',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 'bold',
+                  fontSize: '25px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                {loading ? "⏳ Traitement et redirection..." : "💳 Payer et Soumettre ma demande"}
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
   );
-};
-
-export default Coursier;
+}

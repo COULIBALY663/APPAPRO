@@ -4,7 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Documents from "../pages/Documents";
-import Coursier from "../pages/Coursier";
+import CoursierForm from "../pages/Coursier";
 
 import Marche from "../pages/Marche";
 
@@ -62,7 +62,7 @@ export default function AppRoutes() {
           <PrivateRoute><Contact /></PrivateRoute>
         } />
         <Route path="/Coursier" element={
-          <PrivateRoute><Coursier /></PrivateRoute>
+          <PrivateRoute><CoursierForm /></PrivateRoute>
         } />
 
         <Route path="/Casier" element={
