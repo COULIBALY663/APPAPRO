@@ -3,8 +3,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-import coursier from "../pages/Coursier";
 import Documents from "../pages/Documents";
+import Coursier from "../pages/Coursier";
 
 import Marche from "../pages/Marche";
 
@@ -61,8 +61,8 @@ export default function AppRoutes() {
         <Route path="/Contact" element={
           <PrivateRoute><Contact /></PrivateRoute>
         } />
-        <Route path="/coursier" element={
-          <PrivateRoute><coursier /></PrivateRoute>
+        <Route path="/Coursier" element={
+          <PrivateRoute><Coursier /></PrivateRoute>
         } />
 
         <Route path="/Casier" element={

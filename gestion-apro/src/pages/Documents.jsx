@@ -91,7 +91,7 @@ export default function Documents() {
         {/* 🟣 Bouton 3 */}
         <button
           className="action-btn"
-          onClick={() => navigate("/coursier")}
+          onClick={() => navigate("/Coursier")}
           style={buttonStyle("linear-gradient(135deg, #8b5cf6, #6d28d9)")}
         >
           Accéder aux services coursier
