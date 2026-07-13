@@ -84,13 +84,7 @@ export default function Documents() {
         </button>
 
         {/* 🟣 Bouton 3 : SERVICES COURSIER (Redirection configurée) */}
-        <button
-          className="action-btn"
-          onClick={() => navigate("/Coursier")}
-          style={buttonStyle("linear-gradient(135deg, #8b5cf6, #6d28d9)")}
-        >
-          🛵 Accéder aux services <br /> coursier
-        </button>
+       
 
         {/* 🟠 Bouton 4 */}
         <button

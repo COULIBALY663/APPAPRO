@@ -4,7 +4,7 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Documents from "../pages/Documents";
-import CoursierForm from "../pages/Coursier"; // 👈 Assure-toi que ton fichier s'appelle exactement Coursier.jsx dans ton dossier pages !
+; // 👈 Assure-toi que ton fichier s'appelle exactement Coursier.jsx dans ton dossier pages !
 
 import Marche from "../pages/Marche";
 
@@ -62,9 +62,7 @@ export default function AppRoutes() {
           <PrivateRoute><Contact /></PrivateRoute>
         } />
 
-        <Route path="/coursier" element={
-          <PrivateRoute><CoursierForm /></PrivateRoute>
-        } />
+       
 
         <Route path="/casier" element={
           <PrivateRoute><Casier /></PrivateRoute>
