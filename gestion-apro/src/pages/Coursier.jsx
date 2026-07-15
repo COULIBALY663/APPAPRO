@@ -46,49 +46,54 @@ export default function CoursierForm() {
     }
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Conversion des fichiers (votre logique actuelle)
       const toBase64 = (file) => new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.readAsDataURL(file);
       });
 
-      // Conversion uniquement des 2 fichiers présents
       const b64Files = {
         recto_piece: await toBase64(files.recto_piece),
         verso_piece: await toBase64(files.verso_piece),
       };
 
-      // Sauvegarde dans sessionStorage
-      sessionStorage.setItem("pending_coursier_data", JSON.stringify({
-        formData, // Utilisation de l'état correct
-        files: b64Files
-      }));
-
-      // Appel Paiement
+      // Appel Paiement avec un ID factice "999999" 
+      // Comme votre backend attend un Number, le fait de passer 999999 
+      // validera la condition "if (!certificat_id)"
       const res = await fetch("https://appapro.onrender.com/paiement/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: formData.telephone,
-          montant: 200, // Ajustez selon votre besoin
-          type_service: "coursier"
+          montant: 200,
+          type_service: "coursier",
+          certificat_id: 999999 // <--- L'ASTUCE EST ICI
         }),
       });
 
       const paymentData = await res.json();
+      
       if (paymentData?.payment_url) {
+        // Sauvegarde des données avec l'ID factice pour le suivi
+        sessionStorage.setItem("pending_coursier_data", JSON.stringify({
+          formData,
+          files: b64Files,
+          certificat_id: 999999 
+        }));
+        
         window.location.href = paymentData.payment_url;
       } else {
-        throw new Error("URL de paiement non générée");
+        throw new Error(paymentData.message || "URL de paiement non générée");
       }
     } catch (error) {
       console.error(error);
-      alert("❌ Une erreur est survenue lors de la préparation.");
+      alert("❌ Une erreur est survenue.");
       setLoading(false);
     }
   };
