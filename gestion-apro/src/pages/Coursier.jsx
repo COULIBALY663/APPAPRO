@@ -51,55 +51,83 @@ export default function CoursierForm() {
     setLoading(true);
 
     try {
-      const data = new FormData();
-      Object.keys(formData).forEach((key) => data.append(key, formData[key]));
-      if (files.recto_piece) data.append("recto_piece", files.recto_piece);
-      if (files.verso_piece) data.append("verso_piece", files.verso_piece);
-
-      const res = await fetch("https://appapro.onrender.com/coursier", {
-        method: "POST",
-        body: data,
+      const toBase64 = (file) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(file);
       });
 
-      if (!res.ok) throw new Error("Erreur lors de la pré-inscription");
-      const coursierData = await res.json();
-      const coursierId = coursierData?.id || coursierData?.IDENTIFIANT || coursierData?.id_coursier;
+      // Conversion uniquement des 2 fichiers présents
+      const b64Files = {
+        recto_piece: await toBase64(files.recto_piece),
+        verso_piece: await toBase64(files.verso_piece),
+      };
 
-      const payRes = await fetch("https://appapro.onrender.com/paiement/init", {
+      // Sauvegarde dans sessionStorage
+      sessionStorage.setItem("pending_coursier_data", JSON.stringify({
+        formData, // Utilisation de l'état correct
+        files: b64Files
+      }));
+
+      // Appel Paiement
+      const res = await fetch("https://appapro.onrender.com/paiement/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: formData.telephone,
-          montant: 200,
-          type_service: "coursier",
-          coursier_id: coursierId,
+          montant: 200, // Ajustez selon votre besoin
+          type_service: "coursier"
         }),
       });
 
-      if (!payRes.ok) throw new Error("Erreur initialisation paiement");
-      const paymentData = await payRes.json();
-
+      const paymentData = await res.json();
       if (paymentData?.payment_url) {
-        localStorage.setItem("pending_coursier_payment_success", "true");
         window.location.href = paymentData.payment_url;
       } else {
-        throw new Error("L'URL de paiement n'a pas été générée");
+        throw new Error("URL de paiement non générée");
       }
-
     } catch (error) {
       console.error(error);
-      alert("❌ Une erreur est survenue lors du traitement de votre dossier.");
-    } finally {
+      alert("❌ Une erreur est survenue lors de la préparation.");
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    const isSuccess = localStorage.getItem("pending_coursier_payment_success");
-    if (isSuccess === "true") {
-      localStorage.removeItem("pending_coursier_payment_success");
-      setStep("success");
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const paiementId = urlParams.get("paiementId");
+
+    const finalize = async () => {
+      const stored = sessionStorage.getItem("pending_coursier_data");
+      if (paiementId && stored) {
+        const { formData, files } = JSON.parse(stored);
+        
+        const finalData = new FormData();
+        Object.keys(formData).forEach(k => finalData.append(k, formData[k]));
+        
+        const base64ToBlob = (b64) => {
+           const byteString = atob(b64.split(',')[1]);
+           const ab = new ArrayBuffer(byteString.length);
+           const ia = new Uint8Array(ab);
+           for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+           return new Blob([ab], { type: 'image/jpeg' });
+        };
+        
+        finalData.append("recto_piece", base64ToBlob(files.recto_piece));
+        finalData.append("verso_piece", base64ToBlob(files.verso_piece));
+
+        const res = await fetch(`https://appapro.onrender.com/coursier/${paiementId}`, {
+          method: "POST",
+          body: finalData
+        });
+
+        if (res.ok) {
+          sessionStorage.removeItem("pending_coursier_data");
+          setStep("success");
+        }
+      }
+    };
+    finalize();
   }, []);
 
   // ÉCRAN DE SUCCÈS

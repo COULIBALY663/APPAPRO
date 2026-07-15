@@ -94,7 +94,7 @@ export default function Documents() {
           onClick={() => navigate("/Coursier")}
           style={buttonStyle("linear-gradient(135deg, #8b5cf6, #6d28d9)")}
         >
-          Accéder aux services coursier
+          🏍️ Accéder aux services coursier
         </button>
 
         {/* 🟠 Bouton 4 (Remplacé par un vrai bouton sémantique) */}
