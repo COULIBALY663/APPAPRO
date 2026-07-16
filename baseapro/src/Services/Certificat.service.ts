@@ -9,6 +9,7 @@ import { Readable } from 'stream';
 import { NotificationGateway } from '../notification.gateway';
 import * as webpush from 'web-push';
 import { PushSubscription } from '../entities/push-subscription.entity';
+import { UploadApiOptions } from "cloudinary";
 
 @Injectable()
 export class CertificatService {
@@ -41,23 +42,40 @@ export class CertificatService {
   // ... reste du service
 
   // Méthode privée pour uploader vers Cloudinary
-private async uploadToCloudinary(file: Express.Multer.File): Promise<string> {
+private async uploadToCloudinary(
+  file: Express.Multer.File
+): Promise<string> {
+
   return new Promise((resolve, reject) => {
+let resourceType: UploadApiOptions["resource_type"] = "raw";
+    // Si c'est une image
+    if (file.mimetype.startsWith("image/")) {
+      resourceType = "image";
+    }
+
     const upload = cloudinary.uploader.upload_stream(
-      { folder: 'certificats' },
+      {
+        folder: "academy-pro/documents",
+        resource_type: resourceType,
+      },
+
       (error, result) => {
-        if (error) return reject(error);
-        
-        // Utilisation de l'opérateur de chaînage optionnel (?.) 
-        // ou vérification explicite pour satisfaire TypeScript
+
+        if (error) {
+          return reject(error);
+        }
+
         if (result?.secure_url) {
           resolve(result.secure_url);
         } else {
-          reject(new Error('Cloudinary n\'a pas retourné d\'URL'));
+          reject(new Error("URL Cloudinary absente"));
         }
+
       }
     );
+
     Readable.from(file.buffer).pipe(upload);
+
   });
 }
 
