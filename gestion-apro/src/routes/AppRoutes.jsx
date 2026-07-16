@@ -12,6 +12,7 @@ import EService from "../pages/EService";
 import Certificat from "../pages/Certificat";
 import Casier from "../pages/Casier";
 import Timbre from "../pages/Timbre";
+import Rapport from "../pages/Rapport";
 
 import MainLayout from "../layouts/MainLayout";
 import AuthLayout from "../layouts/AuthLayout";
@@ -75,6 +76,9 @@ export default function AppRoutes() {
         } />
 
       </Route>
+      <Route path="/rapport" element={
+        <PrivateRoute><Rapport /></PrivateRoute>
+      } />
 
       {/* 404 */}
       <Route path="*" element={<Navigate to="/" replace />} />

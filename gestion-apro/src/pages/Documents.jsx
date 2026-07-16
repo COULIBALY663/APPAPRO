@@ -54,7 +54,7 @@ export default function Documents() {
             textTransform: "uppercase",
           }}
         >
-          Bienvenue dans les services d'Académie Pro
+          BIENVENUE DANS LES SERVICES D'ACADEMY PRO
         </h1>
       </div>
 
@@ -73,7 +73,7 @@ export default function Documents() {
         {/* 🔵 Bouton 1 */}
         <button
           className="action-btn"
-          onClick={handleAddDocument}
+          onClick={() => navigate("/rapport")}
           style={buttonStyle("linear-gradient(135deg, #3b82f6, #1d4ed8)")}
         >
           📄 Ajouter un rapport <br /> à mettre en forme
