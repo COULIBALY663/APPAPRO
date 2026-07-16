@@ -99,7 +99,7 @@ export default function Certificat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: form.telephone,
-          montant: 200,
+          montant: 2000,
           type_service: "certificat",
           certificat_id: certificatId // Envoyé tel quel pour compatibilité
         }),
