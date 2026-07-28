@@ -136,18 +136,6 @@ export default function Certificat() {
   const inputStyle = { width: "100%", padding: "12px", marginBottom: "12px", borderRadius: "6px", border: "1px solid #ccc", boxSizing: "border-box" };
   const buttonStyle = { width: "100%", padding: "14px", backgroundColor: "#007BFF", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "16px", fontWeight: "bold" };
   const messageBoxStyle = { textAlign: "center", padding: "30px 20px", backgroundColor: "#fff", borderRadius: "8px", border: "1px solid #e3e3e3" };
-
-  if (step === "success") {
-    return (
-      <div style={containerStyle}>
-        <div style={messageBoxStyle}>
-          <h2 style={{ color: "#28a745" }}>🎉 Félicitations !</h2>
-          <button style={{ ...buttonStyle, marginTop: "20px", width: "auto" }} onClick={() => navigate("/dashboard")}>Aller au Dashboard</button>
-        </div>
-      </div>
-    );
-  }
-
   if (step === "waiting_payment") {
     return (
       <div style={containerStyle}>

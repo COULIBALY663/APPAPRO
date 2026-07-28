@@ -33,8 +33,9 @@ export default function Navbar() {
           <Link to="/" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Accueil</Link>
           <Link to="/documents" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Services</Link>
           <Link to="/marche" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Marché PC</Link>
-          <Link to="/apropos" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">À propos</Link>
+          <Link to="/Propos" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">À propos</Link>
           <Link to="/contact" style={linkStyle} onClick={() => setIsOpen(false)} className="clickable-link">Service client</Link>
+          
         </div>
 
         {/* 3. BOUTONS D'ACTION */}

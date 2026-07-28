@@ -1,0 +1,184 @@
+.propos-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #333;
+  line-height: 1.5;
+}
+
+.propos-header {
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+.propos-badge {
+  font-size: 13px;
+  font-weight: 600;
+  color: #16a34a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.propos-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 10px 0 16px;
+  color: #111;
+}
+
+.propos-header p {
+  color: #555;
+  font-size: 15px;
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+section > h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  border-left: 4px solid #16a34a;
+  padding-left: 10px;
+}
+
+.propos-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.propos-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.propos-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #16a34a;
+  margin-bottom: 12px;
+}
+
+.propos-card-title h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.propos-card p, .propos-service-item p, .propos-value-box p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.propos-grid-services {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.propos-service-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.propos-service-item svg {
+  color: #16a34a;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.propos-service-item h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #111;
+}
+
+.propos-grid-values {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.propos-value-box {
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.propos-value-box svg {
+  color: #16a34a;
+  margin-bottom: 10px;
+}
+
+.propos-value-box h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: #111;
+}
+
+.propos-stats {
+  background: #111827;
+  color: #fff;
+  border-radius: 12px;
+  padding: 30px 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+  text-align: center;
+}
+
+.propos-stats svg {
+  color: #4ade80;
+  margin-bottom: 8px;
+}
+
+.stat-number {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.propos-footer {
+  border-top: 1px solid #eaeaea;
+  padding-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+  color: #666;
+}
+
+.footer-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-item svg {
+  color: #16a34a;
+}

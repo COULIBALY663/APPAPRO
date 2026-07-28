@@ -1,88 +1,69 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 
+// Layouts
+import MainLayout from "../layouts/MainLayout";
+import AuthLayout from "../layouts/AuthLayout";
+
+// Pages Publiques
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Contact from "../pages/Contact";
+import Propos from "../pages/Propos";
+import Success from "../pages/Success";
+import Cancel from "../pages/Cancel";
+
+// Pages Privées
 import Documents from "../pages/Documents";
-import CoursierForm from "../pages/Coursier"; // 👈 Assure-toi que ton fichier s'appelle exactement Coursier.jsx dans ton dossier pages !
-
+import CoursierForm from "../pages/Coursier";
 import Marche from "../pages/Marche";
-
 import EService from "../pages/EService";
 import Certificat from "../pages/Certificat";
 import Casier from "../pages/Casier";
-import Timbre from "../pages/Timbre";
 import Rapport from "../pages/Rapport";
 
-import MainLayout from "../layouts/MainLayout";
-import AuthLayout from "../layouts/AuthLayout";
-import Contact from "../pages/Contact";
-
-// 🔐 Routes privées
-function PrivateRoute({ children }) {
+// 🔐 Composant pour sécuriser plusieurs routes à la fois
+function PrivateRoute() {
   const token = localStorage.getItem("token");
-  return token ? children : <Navigate to="/login" replace />;
+  return token ? <Outlet /> : <Navigate to="/login" replace />;
 }
 
 export default function AppRoutes() {
   return (
     <Routes>
-
-      {/* Pages publiques */}
+      {/* 🌐 PAGES PUBLIQUES (Layout Principal) */}
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/propos" element={<Propos />} />
+        <Route path="/success" element={<Success />} />
+        <Route path="/cancel" element={<Cancel />} />
       </Route>
 
-      {/* Auth */}
+      {/* 🗝️ AUTHENTIFICATION (Layout Auth) */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Route>
 
-      {/* Pages privées */}
-      <Route element={<MainLayout />}>
+      {/* 🔒 PAGES PRIVÉES (Protégées par PrivateRoute) */}
+      <Route element={<PrivateRoute />}>
+        {/* Enveloppées dans MainLayout */}
+        <Route element={<MainLayout />}>
+          <Route path="/documents" element={<Documents />} />
+          <Route path="/marche" element={<Marche />} />
+          <Route path="/eservice" element={<EService />} />
+          <Route path="/certificat" element={<Certificat />} />
+          <Route path="/coursier" element={<CoursierForm />} />
+          <Route path="/casier" element={<Casier />} />
+        </Route>
 
-        <Route path="/documents" element={
-          <PrivateRoute><Documents /></PrivateRoute>
-        } />
-
-        <Route path="/marche" element={
-          <PrivateRoute><Marche /></PrivateRoute>
-        } />
-
-        {/* 🔥 TOUTES LES ROUTES EN MINUSCULES POUR COMPATIBILITÉ LINUX/RENDER */}
-        <Route path="/eservice" element={
-          <PrivateRoute><EService /></PrivateRoute>
-        } />
-          
-        <Route path="/certificat" element={
-          <PrivateRoute><Certificat /></PrivateRoute>
-        } />
-
-        <Route path="/contact" element={
-          <PrivateRoute><Contact /></PrivateRoute>
-        } />
-
-        <Route path="/coursier" element={
-          <PrivateRoute><CoursierForm /></PrivateRoute>
-        } />
-
-        <Route path="/casier" element={
-          <PrivateRoute><Casier /></PrivateRoute>
-        } />
-
-        <Route path="/timbre" element={
-          <PrivateRoute><Timbre /></PrivateRoute>
-        } />
-
+        {/* Route privée HORS du MainLayout (pleine page) */}
+        <Route path="/rapport" element={<Rapport />} />
       </Route>
-      <Route path="/rapport" element={
-        <PrivateRoute><Rapport /></PrivateRoute>
-      } />
 
-      {/* 404 */}
+      {/* ❓ Redirection 404 */}
       <Route path="*" element={<Navigate to="/" replace />} />
-
     </Routes>
   );
 }

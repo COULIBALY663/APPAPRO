@@ -173,24 +173,7 @@ export default function Casier() {
             📄 Demande de Casier Judiciaire
           </h2>
         </div>
-
-        {/* ÉCRAN DE SUCCÈS */}
-        {step === "success" && (
-          <div className="fade-in" style={{ padding: "40px 30px", textAlign: "center" }}>
-            <div style={{ fontSize: "56px", marginBottom: "16px" }}>🎉</div>
-            <h2 style={{ color: "#16a34a", fontWeight: "800", margin: "0 0 12px" }}>Félicitations !</h2>
-            <p style={{ fontSize: "16px", color: "#475569", lineHeight: "1.6", margin: "0 0 24px" }}>
-              Votre demande est bien prise en compte. Nous allons procéder au traitement le plus vite possible.
-            </p>
-            <div style={{ background: "#f0fdf4", padding: "16px", borderRadius: "12px", border: "1px solid #bbf7d0", fontWeight: "700", color: "#16a34a", marginBottom: "32px" }}>
-              ACADEMY PRO vous remercie pour votre confiance !
-            </div>
-            <button className="btn-action" style={primaryButtonStyle} onClick={() => navigate("/dashboard")}>
-              Aller au Dashboard
-            </button>
-          </div>
-        )}
-
+       
         {/* ÉCRAN D'ATTENTE DE PAIEMENT */}
         {step === "waiting_payment" && (
           <div className="fade-in" style={{ padding: "40px 30px", textAlign: "center" }}>
