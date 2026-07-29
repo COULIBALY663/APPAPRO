@@ -9,7 +9,7 @@ export default function EService() {
   fontSize: "16px",
   textAlign: "center",
   fontStyle: "italic",
-  margin: "15px 0" }}>(Tous ces services concernent les documents administratifs ivoiriens, je vous remercie)</p>
+  margin: "15px 0" }}>(Tous ces services concernent les documents administratifs ivoiriens, ACADEMY PRO vous remercie)</p>
     
       <p style={{
   backgroundColor: "#f8fafc", // Fond gris-blanc ultra-léger et moderne
@@ -29,20 +29,20 @@ export default function EService() {
           onClick={() => navigate("/Certificat")}
           style={{btn,background: "#15803d", color: "white", fontSize: "18px", padding: "10px", borderRadius: "10px", border: "none", cursor: "pointer"}}
         >
-          📄 Demande de certificat de nationnalité ivoirienne
+          📄 Demande de certificat de nationnalité ivoirienne (4000f)
         </button>
 
         <button 
           onClick={() => navigate("/Casier")}
           style={{btn,background: "#1e3a8a", color: "white", fontSize: "18px", padding: "10px", borderRadius: "10px", border: "none", cursor: "pointer"}}
         >
-          📑 Demande de casier judiciaire
+          📑 Demande de casier judiciaire (4000f) 
         </button>
         <button 
           onClick={() => navigate("/Timbre")}
           style={{btn,background: "#d97706", color: "white", fontSize: "18px", padding: "10px", borderRadius: "10px", border: "none", cursor: "pointer"}}
         >
-          📄 Demande de timbre
+          📄 Demande de timbre (6000f)
         </button>
         
 

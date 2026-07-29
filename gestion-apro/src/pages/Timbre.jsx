@@ -142,7 +142,7 @@ export default function Timbre() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: form.telephone,
-          montant: 200, 
+          montant: 6000, 
           type_service: form.typeDemande, 
           certificat_id: Number(certificatId),
         }),

@@ -122,7 +122,7 @@ export default function Casier() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: form.telephone,
-          montant: 2000, 
+          montant: 4000, 
           type_service: "casier judiciaire",
           certificat_id: Number(certificatId)
         }),

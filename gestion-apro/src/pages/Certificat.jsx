@@ -99,7 +99,7 @@ export default function Certificat() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: form.telephone,
-          montant: 1000,
+          montant: 4000,
           type_service: "certificat",
           certificat_id: certificatId // Envoyé tel quel pour compatibilité
         }),
@@ -159,28 +159,28 @@ export default function Certificat() {
 
         <h3 style={{backgroundColor:"green", color:"#fff", padding: "10px", textAlign:"center"}}> Documents obligatoires</h3>
         <label style={{ fontWeight: "bold", display: "block", marginTop: "10px" }}>Extrait de moins d'un an du demandeur</label>
-        <input type="file" name="extrait" onChange={handleFileChange} required accept= "accept=.pdf,.jpg,.jpeg,.png"style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="extrait" onChange={handleFileChange} required accept= ".pdf,.jpg,.jpeg,.png"style={{ margin: "5px 0 15px 0" }} />
         {preview.extrait && <img src={preview.extrait} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
 
         <label style={{ fontWeight: "bold", display: "block" }}>Parent Recto</label>
-        <input type="file" name="parent_recto" onChange={handleFileChange} required accept= "accept=.pdf,.jpg,.jpeg,.png"style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="parent_recto" onChange={handleFileChange} required accept= ".pdf,.jpg,.jpeg,.png"style={{ margin: "5px 0 15px 0" }} />
         {preview.parent_recto && <img src={preview.parent_recto} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
         
         <label style={{ fontWeight: "bold", display: "block" }}>Parent Verso</label>
-        <input type="file" name="parent_verso" onChange={handleFileChange} required accept= "accept=.pdf,.jpg,.jpeg,.png"style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="parent_verso" onChange={handleFileChange} required accept= ".pdf,.jpg,.jpeg,.png"style={{ margin: "5px 0 15px 0" }} />
         {preview.parent_verso && <img src={preview.parent_verso} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
 
         <h3 style={{backgroundColor:"#FFCC80", color:"#3e2723", padding:"10px", textAlign:"center"}}> Documents facultatifs</h3>
         <label style={{ display: "block" }}>Recto pièce</label>
-        <input type="file" name="recto_piece" onChange={handleFileChange} accept= "accept=.pdf,.jpg,.jpeg,.png" capture="environment" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="recto_piece" onChange={handleFileChange} accept= ".pdf,.jpg,.jpeg,.png" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.recto_piece && <img src={preview.recto_piece} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
         
         <label style={{ display: "block" }}>Verso pièce</label>
-        <input type="file" name="verso_piece" onChange={handleFileChange} accept= "accept=.pdf,.jpg,.jpeg,.png" capture="environment" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="verso_piece" onChange={handleFileChange} accept= ".pdf,.jpg,.jpeg,.png" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.verso_piece && <img src={preview.verso_piece} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
 
         <label style={{ display: "block" }}>Acte individuel</label>
-        <input type="file" name="acte_individuel" onChange={handleFileChange} accept= "accept=.pdf,.jpg,.jpeg,.png" capture="environment" style={{ margin: "5px 0 15px 0" }} />
+        <input type="file" name="acte_individuel" onChange={handleFileChange} accept= ".pdf,.jpg,.jpeg,.png" capture="environment" style={{ margin: "5px 0 15px 0" }} />
         {preview.acte_individuel && <img src={preview.acte_individuel} alt="Aperçu" style={{ maxWidth: "10%", height: "auto", margin: "10px 0" }} />}
         
         <br /><br />

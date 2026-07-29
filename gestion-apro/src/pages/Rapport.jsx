@@ -157,6 +157,12 @@ export default function Rapport() {
       `}</style>
 
       <div style={containerStyle}>
+         {/* EN-TÊTE PREMIUM */}
+        <div style={headerStyle}>
+          <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "800", textTransform: "uppercase" }}>
+            📄 Demande de mise en forme de rapport de stage
+          </h2>
+        </div>
         
         {/* ÉCRAN D'ATTENTE DE PAIEMENT */}
         {step === "waiting_payment" && (
