@@ -130,7 +130,7 @@ export default function Propos() {
         </div>
         <div>
           <Smile size={24} />
-          <div className="stat-number">+5000</div>
+          <div className="stat-number">+2000</div>
           <div className="stat-label">Utilisateurs satisfaits</div>
         </div>
         <div>
@@ -147,7 +147,7 @@ export default function Propos() {
 
       {/* Contact / Pied de page */}
       <footer className="propos-footer">
-        <div className="footer-item"><Mail size={14} /> <span>academypro@gmail.com</span></div>
+        <div className="footer-item"><Mail size={14} /> <span>academypro61@gmail.com</span></div>
         <div className="footer-item"><Phone size={14} /> <span>+225 05 64 22 51 78</span></div>
         <div className="footer-item"><MapPin size={14} /> <span>Korhogo, Côte d'Ivoire</span></div>
         <div className="footer-item"><Globe size={14} /> <span>www.academypro.ci</span></div>

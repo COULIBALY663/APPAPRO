@@ -10,8 +10,6 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Contact from "../pages/Contact";
 import Propos from "../pages/Propos";
-import Success from "../pages/Success";
-import Cancel from "../pages/Cancel";
 
 // Pages Privées
 import Documents from "../pages/Documents";
@@ -21,6 +19,7 @@ import EService from "../pages/EService";
 import Certificat from "../pages/Certificat";
 import Casier from "../pages/Casier";
 import Rapport from "../pages/Rapport";
+import Timbre from  "../pages/Timbre";
 
 // 🔐 Composant pour sécuriser plusieurs routes à la fois
 function PrivateRoute() {
@@ -36,8 +35,6 @@ export default function AppRoutes() {
         <Route path="/" element={<Home />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/propos" element={<Propos />} />
-        <Route path="/success" element={<Success />} />
-        <Route path="/cancel" element={<Cancel />} />
       </Route>
 
       {/* 🗝️ AUTHENTIFICATION (Layout Auth) */}
@@ -56,6 +53,7 @@ export default function AppRoutes() {
           <Route path="/certificat" element={<Certificat />} />
           <Route path="/coursier" element={<CoursierForm />} />
           <Route path="/casier" element={<Casier />} />
+          <Route path= "/Timbre" element={<Timbre />}/>
         </Route>
 
         {/* Route privée HORS du MainLayout (pleine page) */}

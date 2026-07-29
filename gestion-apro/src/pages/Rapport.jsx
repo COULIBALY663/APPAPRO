@@ -13,6 +13,7 @@ export default function Rapport() {
     nom: "",
     prenom: "",
     telephone: "",
+    montant: "", 
   
   });
 
@@ -64,6 +65,7 @@ export default function Rapport() {
       formData.append("nom", form.nom);
       formData.append("prenom", form.prenom);
       formData.append("telephone", form.telephone);
+      formData.append("montant", form.montant);
       
 
       Object.keys(files).forEach((key) => {
@@ -111,7 +113,7 @@ export default function Rapport() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           telephone: form.telephone,
-          montant: 200, 
+          montant: Number(form.montant),
           type_service: "Rapport de stage",
           certificat_id: Number(certificatId)
         }),
@@ -156,13 +158,6 @@ export default function Rapport() {
 
       <div style={containerStyle}>
         
-        {/* EN-TÊTE PREMIUM */}
-        <div style={headerStyle}>
-          <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "800", textTransform: "uppercase" }}>
-            📄 Demande de mise en forme de rapport de stage
-          </h2>
-        </div>
-
         {/* ÉCRAN D'ATTENTE DE PAIEMENT */}
         {step === "waiting_payment" && (
           <div className="fade-in" style={{ padding: "40px 30px", textAlign: "center" }}>
@@ -190,6 +185,30 @@ export default function Rapport() {
               </div>
               
               <input name="telephone" type="tel" placeholder="Téléphone(whatsapp)" className="input-field" style={inputStyle} required onChange={handleChange} />
+              <div style={{ marginBottom: "20px" }}>
+  <label style={labelStyle}>
+    💰 Montant à payer <span style={{ color: "red" }}>*</span>
+  </label>
+
+  <div
+    style={{display: "flex", alignItems: "center",border: "1px solid #cbd5e1",borderRadius: "12px",overflow: "hidden",background: "#fff",}}
+  >
+    <input name="montant" type="number" min="100" placeholder="Ex : 5000" className="input-field"
+      style={{  ...inputStyle, marginBottom: 0,border: "none",flex: 1, }} required value={form.montant}onChange={handleChange}/>
+
+    <span
+      style={{
+        padding: "14px 18px",
+        background: "#f8fafc",
+        fontWeight: "700",
+        color: "#16a34a",
+        borderLeft: "1px solid #e2e8f0",
+      }}
+    >
+      FCFA
+    </span>
+  </div>
+</div>
 
              
               {/* DOCUMENTS OBLIGATOIRES */}
