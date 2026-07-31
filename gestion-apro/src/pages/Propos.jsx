@@ -25,9 +25,13 @@ export default function Propos() {
       
       {/* En-tête / Titre */}
       <header className="propos-header">
-        <span className="propos-badge" style={{ backgroundColor: '#16a34a', color: '#fff', fontSize: '60px', padding: '5px 10px', borderRadius: '5px' }}>
-          À propos d'Academy Pro
-        </span>
+        <span
+  className="propos-badge"
+  style={{display: "block", width: "fit-content",margin: "0 auto", backgroundColor: "#16a34a", color: "#fff",
+    fontSize: "20px", padding: "5px 10px", borderRadius: "5px",textAlign: "center", }}
+>
+  À propos d'Academy Pro
+</span>
         <h1>Votre partenaire pour tous vos besoins numériques.</h1>
         <p>
           Academy Pro est une plateforme de services numériques conçue pour répondre aux besoins des particuliers, des étudiants, des professionnels et des entreprises. Nous proposons des solutions innovantes, rapides, sécurisées et accessibles à tous.

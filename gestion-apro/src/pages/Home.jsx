@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
 export default function Home() {
   const services = [
     {
@@ -55,31 +59,114 @@ export default function Home() {
     },
   ];
 
+  // État dynamique pour les avis clients
+  const [avisClients, setAvisClients] = useState([]);
+
+  // États pour contrôler le formulaire d'ajout d'avis
+  const [afficherFormulaire, setAfficherFormulaire] = useState(false);
+  const [nouveauNom, setNouveauNom] = useState("");
+  const [nouvelleNote, setNouvelleNote] = useState(5);
+  const [nouveauCommentaire, setNouveauCommentaire] = useState("");
+
+  // Charger les commentaires depuis NestJS au démarrage
+  useEffect(() => {
+    fetch("http://localhost:3000/commentaires")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          // Filtrer pour ne garder que les avis actifs (si la propriété 'actif' existe)
+          const actifs = data.filter((avis) => avis.actif !== false);
+          setAvisClients(actifs);
+        }
+      })
+      .catch((err) => console.error("Erreur de chargement des avis :", err));
+  }, []);
+
+  // Fonction pour soumettre un nouvel avis vers NestJS
+  const ajouterAvis = async (e) => {
+    e.preventDefault();
+    if (!nouveauNom.trim() || !nouveauCommentaire.trim()) return;
+
+    try {
+      const response = await fetch("http://localhost:3000/commentaires", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nom: nouveauNom,
+          note: Number(nouvelleNote),
+          commentaire: nouveauCommentaire,
+        }),
+      });
+
+      if (response.ok) {
+        const nouvelAvisEnregistre = await response.json();
+        
+        // Ajoute le nouvel avis renvoyé par le serveur tout en haut de la liste
+        setAvisClients([nouvelAvisEnregistre, ...avisClients]);
+        
+        // Réinitialisation du formulaire
+        setNouveauNom("");
+        setNouvelleNote(5);
+        setNouveauCommentaire("");
+        setAfficherFormulaire(false);
+      } else {
+        alert("Erreur lors de l'enregistrement de l'avis.");
+      }
+    } catch (error) {
+      console.error("Erreur réseau :", error);
+      alert("Impossible de contacter le serveur NestJS.");
+    }
+  };
+
   return (
     <div
       style={{
         fontFamily: "Arial, sans-serif",
         background: "#f5f7fb",
         color: "#0f172a",
-        overflowX: "hidden", // Évite les barres de défilement horizontales bizarres sur mobile
+        overflowX: "hidden",
       }}
     >
+      {/* HEADER / NAVIGATION */}
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "20px clamp(15px, 5vw, 60px)",
+          background: "#ffffff",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+        }}
+      >
+        <h2 style={{ margin: 0, color: "#02152b", fontSize: "22px" }}>
+          ACADEMY <span style={{ color: "#22c55e" }}>PRO</span>
+        </h2>
+        <div style={{ display: "flex", gap: "15px" }}>
+          <button style={heroBtn2}>Contact</button>
+          <button style={heroBtn}>Espace Client</button>
+        </div>
+      </header>
+
       {/* HERO SECTION */}
       <section
         style={{
           display: "flex",
           flexDirection: "row",
-          flexWrap: "wrap-reverse", // Sur mobile, l'image passe au-dessus du texte naturellement
+          flexWrap: "wrap-reverse",
           alignItems: "center",
           gap: "40px",
-          padding: "clamp(20px, 5vw, 60px) clamp(15px, 5vw, 40px)", // Padding dynamique intelligent
+          padding: "clamp(20px, 5vw, 60px) clamp(15px, 5vw, 40px)",
         }}
       >
-        {/* Texte du Hero */}
         <div style={{ flex: "1 1 450px" }}>
           <h1
             style={{
-              fontSize: "clamp(32px, 5vw, 60px)", // S'adapte de 32px (mobile) à 60px (PC) sans déborder
+              fontSize: "clamp(32px, 5vw, 60px)",
               marginBottom: "20px",
               lineHeight: "1.2",
             }}
@@ -98,13 +185,11 @@ export default function Home() {
             Votre partenaire pour tous vos besoins numériques.
           </p>
 
-          {/* Boutons d'action responsives */}
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             <button style={heroBtn}>Découvrir nos services</button>
             <button style={heroBtn2}>Voir les ordinateurs</button>
           </div>
 
-          {/* Badges badges fluides */}
           <div
             style={{
               display: "flex",
@@ -120,7 +205,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Image du Hero */}
         <div style={{ flex: "1 1 400px", textAlign: "center" }}>
           <img
             src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853"
@@ -151,7 +235,7 @@ export default function Home() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", // Aligne proprement 1, 2 ou 3 colonnes selon l'écran
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: "20px",
           }}
         >
@@ -216,19 +300,190 @@ export default function Home() {
         </div>
       </section>
 
+      {/* AVIS CLIENTS DYNAMIQUES */}
+      <section
+        style={{
+          padding: "60px clamp(15px,5vw,60px)",
+          background: "#ffffff",
+        }}
+      >
+        <h2
+          style={{
+            textAlign: "center",
+            fontSize: "38px",
+            marginBottom: "10px",
+            color: "#02152b",
+          }}
+        >
+          ⭐ Ce que pensent nos clients
+        </h2>
+
+        <p
+          style={{
+            textAlign: "center",
+            color: "#64748b",
+            marginBottom: "40px",
+            fontSize: "18px",
+          }}
+        >
+          Plus de <strong>5 000 clients</strong> nous font confiance.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
+            gap: "25px",
+          }}
+        >
+          {avisClients.map((avis, index) => (
+            <div
+              key={avis.id || index}
+              style={{
+                background: "#f8fafc",
+                padding: "25px",
+                borderRadius: "18px",
+                boxShadow: "0 8px 25px rgba(0,0,0,.08)",
+                borderLeft: "6px solid #22c55e",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "15px",
+                }}
+              >
+                <div>
+                  <h3 style={{ margin: 0 }}>{avis.nom}</h3>
+                  <small style={{ color: "#94a3b8" }}>
+                    {avis.createdAt ? new Date(avis.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : avis.date}
+                  </small>
+                </div>
+                <span style={{ color: "#f59e0b", fontSize: "22px" }}>
+                  {"★".repeat(avis.note)}
+                </span>
+              </div>
+              <p style={{ color: "#475569", lineHeight: "1.7" }}>
+                "{avis.commentaire}"
+              </p>
+
+              {/* Affichage de la réponse admin si elle existe */}
+              {avis.reponseAdmin && (
+                <div style={{ marginTop: "15px", padding: "10px", background: "#e2e8f0", borderRadius: "8px", fontSize: "13px" }}>
+                  <strong>Réponse d'Academy Pro :</strong> {avis.reponseAdmin}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Bouton pour afficher/masquer le formulaire */}
+        <div style={{ textAlign: "center", marginTop: "40px" }}>
+          <button
+            onClick={() => setAfficherFormulaire(!afficherFormulaire)}
+            style={{
+              background: "#22c55e",
+              color: "#fff",
+              border: "none",
+              padding: "15px 35px",
+              borderRadius: "12px",
+              fontSize: "16px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            {afficherFormulaire ? "Fermer le formulaire" : "Laisser un avis"}
+          </button>
+        </div>
+
+        {/* Formulaire dynamique d'ajout d'avis */}
+        {afficherFormulaire && (
+          <form
+            onSubmit={ajouterAvis}
+            style={{
+              maxWidth: "600px",
+              margin: "30px auto 0",
+              background: "#f8fafc",
+              padding: "30px",
+              borderRadius: "18px",
+              boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "15px",
+            }}
+          >
+            <h3 style={{ margin: 0, textAlign: "center", color: "#02152b" }}>Partagez votre expérience</h3>
+            
+            <div>
+              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Votre Nom :</label>
+              <input
+                type="text"
+                value={nouveauNom}
+                onChange={(e) => setNouveauNom(e.target.value)}
+                placeholder="Ex: Kouassi Marie"
+                required
+                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Note (1 à 5 étoiles) :</label>
+              <select
+                value={nouvelleNote}
+                onChange={(e) => setNouvelleNote(e.target.value)}
+                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+              >
+                <option value="5">★★★★★ (5/5)</option>
+                <option value="4">★★★★☆ (4/5)</option>
+                <option value="3">★★★☆☆ (3/5)</option>
+                <option value="2">★★☆☆☆ (2/5)</option>
+                <option value="1">★☆☆☆☆ (1/5)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Votre Commentaire :</label>
+              <textarea
+                value={nouveauCommentaire}
+                onChange={(e) => setNouveauCommentaire(e.target.value)}
+                placeholder="Qu'avez-vous pensé de nos services ?"
+                rows="4"
+                required
+                style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              style={{
+                background: "#02152b",
+                color: "white",
+                border: "none",
+                padding: "12px",
+                borderRadius: "8px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              Publier mon avis
+            </button>
+          </form>
+        )}
+      </section>
+
       {/* STATS SECTION */}
       <section
         style={{
           background: "#02152b",
           color: "white",
           padding: "60px clamp(15px, 5vw, 60px)",
-          marginTop: "50px",
         }}
       >
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", // Grille ultra flexible pour mobile
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
             gap: "40px 20px",
             textAlign: "center",
           }}
@@ -239,6 +494,24 @@ export default function Home() {
           <Stat value="+300" label="Ordinateurs vendus" />
         </div>
       </section>
+
+      {/* FOOTER */}
+      <footer
+        style={{
+          background: "#010e1c",
+          color: "#94a3b8",
+          padding: "40px clamp(15px, 5vw, 60px)",
+          textAlign: "center",
+          fontSize: "14px",
+        }}
+      >
+        <p style={{ margin: "0 0 10px", color: "#ffffff", fontWeight: "bold", fontSize: "16px" }}>
+          Academy Pro - Votre solution numérique au quotidien
+        </p>
+        <p style={{ margin: 0 }}>
+          &copy; {new Date().getFullYear()} Academy Pro. Tous droits réservés.
+        </p>
+      </footer>
     </div>
   );
 }
@@ -302,7 +575,7 @@ const cardStyle = {
   boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-between", // Aligne proprement les boutons en bas des cartes
+  justifyContent: "space-between",
 };
 
 const productCard = {
@@ -313,7 +586,7 @@ const productCard = {
 };
 
 const smallBtn = {
-  marginTop: "auto", // Pousse le bouton vers le bas
+  marginTop: "auto",
   background: "#22c55e",
   border: "none",
   color: "white",

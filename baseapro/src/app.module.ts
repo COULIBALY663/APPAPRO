@@ -17,10 +17,12 @@ import { UsersServices } from './Services/users.services';
 import { UsersController } from './controllers/users.controllers';
 import { IUsersRepository } from './repository/users.repository';
 import { CoursierController } from './controllers/Coursier.controllers';
+import { CommentaireController } from "./controllers/commentaire.controller";
 
 import { LoginService } from './Services/Login.service';
 import { LoginController } from './controllers/login.controllers';
 import { GoogleStrategy } from './Services/google.strategy';
+import { CommentaireService } from "./Services/commentaire.service";
 
 import { CasierController } from './controllers/casier.controllers';
 import { CASIER_REPOSITORY } from './repository/casier.repository';
@@ -35,7 +37,7 @@ import { PaiementController } from './controllers/paiement.controllers';
 import { PaiementRepository } from './repository/paiement.repository';
 import { PaiementService } from './Services/paiement.service';
 import { AppController } from './app.controller';
-
+import { Commentaire } from "./entities/commentaire.entity";
 // === SUPPORT (WhatsApp) ===
 import { SupportController } from './controllers/support.controllers';
 import { SupportService } from './Services/message.service';
@@ -62,6 +64,7 @@ import { PushController } from './controllers/push.controller';
       Casier,
       Message, // ✅ Entité ajoutée
       PushSubscription,
+      Commentaire,
     ]),
   ],
 
@@ -75,6 +78,7 @@ import { PushController } from './controllers/push.controller';
     SupportController, // ✅ Contrôleur ajouté
     PushController,
     CoursierController, // ✅ Contrôleur ajouté
+    CommentaireController,
   ],
 
   providers: [
@@ -88,6 +92,7 @@ import { PushController } from './controllers/push.controller';
     GoogleStrategy,
     CoursierService, // ✅ Service ajouté
     NotificationGateway, // ✅ Gateway ajoutée
+    CommentaireService,
 
     // Déclaration des interfaces (alias)
     { provide: IUsersRepository, useClass: UsersServices },

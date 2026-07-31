@@ -138,13 +138,7 @@ export default function Rapport() {
     }
   };
 
-  useEffect(() => {
-    const isSuccess = localStorage.getItem("pending_payment_success");
-    if (isSuccess === "true") {
-      localStorage.removeItem("pending_payment_success");
-      setStep("success");
-    }
-  }, []);
+ 
 
   return (
     <div style={{ background: "#f1f5f9", minHeight: "100vh", padding: "40px 15px", fontFamily: "'Inter', sans-serif" }}>

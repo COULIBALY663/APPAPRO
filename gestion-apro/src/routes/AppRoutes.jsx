@@ -21,6 +21,7 @@ import Casier from "../pages/Casier";
 import Rapport from "../pages/Rapport";
 import Timbre from  "../pages/Timbre";
 
+
 // 🔐 Composant pour sécuriser plusieurs routes à la fois
 function PrivateRoute() {
   const token = localStorage.getItem("token");
