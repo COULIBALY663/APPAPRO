@@ -488,9 +488,9 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          <Stat value="+5000" label="Clients satisfaits" />
-          <Stat value="+12000" label="Documents traités" />
-          <Stat value="+800" label="Apprenants formés" />
+          <Stat value="+1000" label="Clients satisfaits" />
+          <Stat value="+200" label="Documents traités" />
+          <Stat value="+300" label="Apprenants formés" />
           <Stat value="+300" label="Ordinateurs vendus" />
         </div>
       </section>

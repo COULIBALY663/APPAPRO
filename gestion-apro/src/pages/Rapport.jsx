@@ -154,7 +154,7 @@ export default function Rapport() {
          {/* EN-TÊTE PREMIUM */}
         <div style={headerStyle}>
           <h2 style={{ margin: 0, fontSize: "20px", fontWeight: "800", textTransform: "uppercase" }}>
-            📄 Demande de mise en forme de rapport de stage
+            📄 Demande de mise en forme de rapport de stage (2000F possiblité de payer avance)
           </h2>
         </div>
         
