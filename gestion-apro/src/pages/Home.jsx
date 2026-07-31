@@ -70,7 +70,7 @@ export default function Home() {
 
   // Charger les commentaires depuis NestJS au démarrage
   useEffect(() => {
-    fetch("http://localhost:3000/commentaires")
+    fetch("https://appapro.onrender.com/commentaires")
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -88,7 +88,7 @@ export default function Home() {
     if (!nouveauNom.trim() || !nouveauCommentaire.trim()) return;
 
     try {
-      const response = await fetch("http://localhost:3000/commentaires", {
+      const response = await fetch("https://appapro.onrender.com/commentaires", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
