@@ -143,13 +143,7 @@ export default function Home() {
           zIndex: 1000,
         }}
       >
-        <h2 style={{ margin: 0, color: "#02152b", fontSize: "22px" }}>
-          ACADEMY <span style={{ color: "#22c55e" }}>PRO</span>
-        </h2>
-        <div style={{ display: "flex", gap: "15px" }}>
-          <button style={heroBtn2}>Contact</button>
-          <button style={heroBtn}>Espace Client</button>
-        </div>
+      
       </header>
 
       {/* HERO SECTION */}
